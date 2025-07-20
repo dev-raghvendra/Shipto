@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId         String    @id @default(nanoid())
+  fullName       String
+  email          String    @unique
+  passwordHash   String    @unique
+  avatarUri      String    @unique
+  emailVerified  Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  teamMembers    TeamMember[]
+  projectMembers ProjectMember[]
+}
+
+model Team {
+  teamId      String       @id @default(uuid())
+  teamName    String
+  description String?
+  planType    String       @default("free")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+  teamMembers TeamMember[]
+  rolePermissions RolePermissionMap[]
+}
+
+model Role {
+  roleId      String       @id @default(uuid())
+  roleName    String       @unique
+  description String?
+  projectMembers ProjectMember[]
+  rolePermissions RolePermissionMap[]
+}
+
+model Permission {
+  permissionId   String        @id @default(uuid())
+  permissionName String        @unique
+  permission     PermissionType @unique
+  rolePermissions RolePermissionMap[]
+}
+
+model RolePermissionMap {
+  roleId       String
+  permissionId String
+  teamId       String
+
+  role       Role       @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [permissionId])
+  team       Team       @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+
+  @@id([roleId, permissionId, teamId])
+}
+
+model TeamMember {
+  memberId String @id @default(uuid())
+  userId   String
+  teamId   String
+  roleId   String
+
+  team   Team  @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+  member User  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+model ProjectMember {
+  userId    String
+  roleId    String
+  projectId String
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+
+  @@id([userId, projectId])
+}
+
+enum PermissionType {
+  Read
+  Update
+  Delete
+  Create
+}
