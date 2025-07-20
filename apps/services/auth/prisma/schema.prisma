@@ -23,6 +23,7 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
   teamMembers    TeamMember[]
+  provider       ProviderType 
   projectMembers ProjectMember[]
 }
 
@@ -90,4 +91,10 @@ enum PermissionType {
   Update
   Delete
   Create
+}
+
+enum ProviderType {
+  Google
+  Github
+  Email
 }
