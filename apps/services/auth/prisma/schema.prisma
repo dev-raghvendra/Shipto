@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 generator client {
   provider = "prisma-client-js"
   output   = "./generated"
@@ -14,14 +10,14 @@ datasource db {
 }
 
 model User {
-  userId         String    @id @default(nanoid())
+  userId         String    @id @default(uuid())
   fullName       String
   email          String    @unique
-  passwordHash   String    @unique
+  password       String    @unique
   avatarUri      String    @unique
   emailVerified  Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now())
+  createdAt      DateTime?  @default(now())
+  updatedAt      DateTime?  @default(now())
   teamMembers    TeamMember[]
   provider       ProviderType 
   projectMembers ProjectMember[]
@@ -32,44 +28,18 @@ model Team {
   teamName    String
   description String?
   planType    String       @default("free")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now())
+  createdAt   DateTime?     @default(now())
+  updatedAt   DateTime?     @default(now())
   teamMembers TeamMember[]
-  rolePermissions RolePermissionMap[]
+  teamInvitation TeamMemberInvitation[]
 }
 
-model Role {
-  roleId      String       @id @default(uuid())
-  roleName    String       @unique
-  description String?
-  projectMembers ProjectMember[]
-  rolePermissions RolePermissionMap[]
-}
-
-model Permission {
-  permissionId   String        @id @default(uuid())
-  permissionName String        @unique
-  permission     PermissionType @unique
-  rolePermissions RolePermissionMap[]
-}
-
-model RolePermissionMap {
-  roleId       String
-  permissionId String
-  teamId       String
-
-  role       Role       @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [permissionId])
-  team       Team       @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
-
-  @@id([roleId, permissionId, teamId])
-}
 
 model TeamMember {
   memberId String @id @default(uuid())
   userId   String
   teamId   String
-  roleId   String
+  role     RoleType
 
   team   Team  @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
   member User  @relation(fields: [userId], references: [userId], onDelete: Cascade)
@@ -77,24 +47,61 @@ model TeamMember {
 
 model ProjectMember {
   userId    String
-  roleId    String
+  role      RoleType
   projectId String
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
 
   @@id([userId, projectId])
 }
 
+model TeamMemberInvitation {
+  inviteId String  @id   @default(uuid())
+  role     RoleType   
+  teamId   String
+  status   InviteStatus
+
+  team     Team @relation(fields: [teamId],references: [teamId], onDelete: Cascade)
+}
+
+model ProjectMemberInvitation {
+  inviteId    String  @id   @default(uuid())
+  role        RoleType   
+  projectId   String
+  status      InviteStatus
+}
+
 enum PermissionType {
-  Read
-  Update
-  Delete
-  Create
+  READ
+  UPDATE
+  DELETE
+  CREATE
+  SELF_DELETE
+  SELF_UPDATE
 }
 
 enum ProviderType {
-  Google
-  Github
-  Email
+  GOOGLE
+  GITHUB
+  EMAIL
+}
+
+enum RoleType {
+  OWNER
+  DEVELOPER
+  ADMIN
+  VIEWER
+}
+
+enum ScopeType {
+  PROJECT
+  TEAM
+  DEPLOYMENT
+  TEAM_MEMBER
+  PROJECT_MEMBER
+}
+
+enum InviteStatus {
+  ACCEPTED
+  PENDING
 }
