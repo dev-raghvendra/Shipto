@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "./generated"
@@ -10,66 +9,82 @@ datasource db {
 }
 
 model User {
-  userId         String    @id @default(uuid())
+  userId         String           @id @default(uuid())
   fullName       String
-  email          String    @unique
-  password       String    @unique
-  avatarUri      String    @unique
-  emailVerified  Boolean   @default(false)
-  createdAt      DateTime?  @default(now())
-  updatedAt      DateTime?  @default(now())
+  email          String           @unique
+  password       String           @unique
+  avatarUri      String           @unique
+  emailVerified  Boolean          @default(false)
+  createdAt      DateTime?        @default(now())
+  updatedAt      DateTime?        @default(now())
   teamMembers    TeamMember[]
-  provider       ProviderType 
+  provider       ProviderType
   projectMembers ProjectMember[]
 }
 
 model Team {
-  teamId      String       @id @default(uuid())
-  teamName    String
-  description String?
-  planType    String       @default("free")
-  createdAt   DateTime?     @default(now())
-  updatedAt   DateTime?     @default(now())
-  teamMembers TeamMember[]
-  teamInvitation TeamMemberInvitation[]
+  teamId           String                 @id @default(uuid())
+  teamName         String
+  description      String?
+  planType         String                 @default("free")
+  createdAt        DateTime?              @default(now())
+  updatedAt        DateTime?              @default(now())
+  teamMembers      TeamMember[]
+  teamInvitation   TeamMemberInvitation[]
 }
 
-
 model TeamMember {
-  memberId String @id @default(uuid())
+  memberId String   @id @default(uuid())
   userId   String
   teamId   String
   role     RoleType
 
-  team   Team  @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
-  member User  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  team     Team     @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+  member   User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model ProjectMember {
   userId    String
   role      RoleType
   projectId String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+  // projectMemberPermissionOverride  ProjectMemberPermissionOverride[]
 
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@id([userId, projectId])
 }
 
 model TeamMemberInvitation {
-  inviteId String  @id   @default(uuid())
-  role     RoleType   
-  teamId   String
-  status   InviteStatus
+  inviteId   String      @id @default(uuid())
+  role       RoleType
+  teamId     String
+  status     InviteStatus
+  createdAt  DateTime?   @default(now())
+  updatedAt  DateTime?   @default(now())
+  // teamMemberPermissionOverride  TeamMemberPermissionOverride[]
 
-  team     Team @relation(fields: [teamId],references: [teamId], onDelete: Cascade)
+  team       Team        @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
 }
 
 model ProjectMemberInvitation {
-  inviteId    String  @id   @default(uuid())
-  role        RoleType   
+  inviteId    String      @id @default(uuid())
+  role        RoleType
   projectId   String
   status      InviteStatus
+  createdAt   DateTime?   @default(now())
+  updatedAt   DateTime?   @default(now())
 }
+
+model TeamLink {
+  teamId      String
+  projectId   String
+  linkedAt    DateTime?   @default(now())
+
+  @@id([teamId, projectId])
+}
+
 
 enum PermissionType {
   READ
@@ -99,9 +114,33 @@ enum ScopeType {
   DEPLOYMENT
   TEAM_MEMBER
   PROJECT_MEMBER
+  TEAM_LINK
 }
 
 enum InviteStatus {
   ACCEPTED
   PENDING
 }
+
+// model ProjectMemberPermissionOverride {
+//   permissionId          String @id @default(uuid())
+//   projectMemberId       String 
+//   projectId     String 
+//   role         RoleType
+//   scope        ScopeType
+//   permissions  PermissionType[]
+
+//   projectMember         ProjectMember  @relation(fields: [projectMemberId],references: [memberId],onDelete: Cascade)
+// }
+
+// model TeamMemberPermissionOverride {
+//   permissionId   String @id @default(uuid())
+//   teamMemberId   String 
+//   teamId         String 
+//   role           RoleType
+//   scope          ScopeType
+//   permissions    PermissionType[]
+
+//   teamMember     Team  @relation(fields: [teamMemberId],references: [memberId],onDelete: Cascade)
+//   team           Team  @relation(fields: [teamId],references: [userId],onDelete: Cascade)
+// }
