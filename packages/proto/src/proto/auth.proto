@@ -1,0 +1,310 @@
+syntax = "proto3";
+
+package auth;
+
+// ============================================================================
+// AUTHENTICATION MESSAGES
+// ============================================================================
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  User user = 3;
+  bool success = 4;
+  string message = 5;
+}
+
+message SignupRequest {
+  string email = 1;
+  string password = 2;
+  string full_name = 3;
+  string phone = 4;
+}
+
+message SignupResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  User user = 3;
+  bool success = 4;
+  string message = 5;
+}
+
+message OAuthRequest {
+  string provider = 1; // "google", "github", etc.
+  string auth_code = 2;
+  string redirect_uri = 3;
+}
+
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  User user = 3;
+  bool success = 4;
+  string message = 5;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  bool success = 3;
+  string message = 4;
+}
+
+// ============================================================================
+// TEAM MANAGEMENT MESSAGES
+// ============================================================================
+
+message CreateTeamRequest {
+  string name = 1;
+  string description = 2;
+  string owner_id = 3;
+}
+
+message CreateTeamResponse {
+  Team team = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetTeamRequest {
+  string team_id = 1;
+}
+
+message GetTeamResponse {
+  Team team = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message DeleteTeamRequest {
+  string team_id = 1;
+  string user_id = 2;
+}
+
+message DeleteTeamResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ============================================================================
+// TEAM MEMBER MESSAGES
+// ============================================================================
+
+message CreateTeamMemberInvitationRequest {
+  string team_id = 1;
+  string email = 2;
+  string role = 3; // "admin", "member", "viewer"
+  string invited_by = 4;
+}
+
+message CreateTeamMemberInvitationResponse {
+  TeamMemberInvitation invitation = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetTeamMemberRequest {
+  string team_id = 1;
+  string user_id = 2;
+}
+
+message GetTeamMemberResponse {
+  TeamMember member = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UpdateTeamMemberRequest {
+  string team_id = 1;
+  string user_id = 2;
+  string role = 3;
+}
+
+message UpdateTeamMemberResponse {
+  TeamMember member = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message DeleteTeamMemberRequest {
+  string team_id = 1;
+  string user_id = 2;
+}
+
+message DeleteTeamMemberResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ============================================================================
+// PROJECT MEMBER MESSAGES
+// ============================================================================
+
+message ProjectMemberInvitationRequest {
+  string project_id = 1;
+  string email = 2;
+  string role = 3;
+  string invited_by = 4;
+}
+
+message ProjectMemberInvitationResponse {
+  ProjectMemberInvitation invitation = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetProjectMemberRequest {
+  string project_id = 1;
+  string user_id = 2;
+}
+
+message GetProjectMemberResponse {
+  ProjectMember member = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UpdateProjectMemberRequest {
+  string project_id = 1;
+  string user_id = 2;
+  string role = 3;
+}
+
+message UpdateProjectMemberResponse {
+  ProjectMember member = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message DeleteProjectMemberRequest {
+  string project_id = 1;
+  string user_id = 2;
+}
+
+message DeleteProjectMemberResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DeleteProjectRequest {
+  string project_id = 1;
+  string user_id = 2;
+}
+
+message DeleteProjectResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ============================================================================
+// SHARED DATA TYPES
+// ============================================================================
+
+message User {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string phone = 4;
+  string avatar_url = 5;
+  bool email_verified = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+message Team {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string owner_id = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message TeamMember {
+  string id = 1;
+  string team_id = 2;
+  string user_id = 3;
+  string role = 4;
+  int64 joined_at = 5;
+}
+
+message TeamMemberInvitation {
+  string id = 1;
+  string team_id = 2;
+  string email = 3;
+  string role = 4;
+  string invited_by = 5;
+  string status = 6; // "pending", "accepted", "rejected"
+  int64 created_at = 7;
+  int64 expires_at = 8;
+}
+
+message ProjectMember {
+  string id = 1;
+  string project_id = 2;
+  string user_id = 3;
+  string role = 4;
+  int64 joined_at = 5;
+}
+
+message ProjectMemberInvitation {
+  string id = 1;
+  string project_id = 2;
+  string email = 3;
+  string role = 4;
+  string invited_by = 5;
+  string status = 6;
+  int64 created_at = 7;
+  int64 expires_at = 8;
+}
+
+// ============================================================================
+// SERVICES
+// ============================================================================
+
+service AuthService {
+  // Authentication
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Signup(SignupRequest) returns (SignupResponse);
+  rpc OAuth(OAuthRequest) returns (AuthResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  
+  // Team Management
+  rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
+  rpc GetTeam(GetTeamRequest) returns (GetTeamResponse);
+  rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
+  
+  // Team Members
+  rpc CreateTeamMemberInvitation(CreateTeamMemberInvitationRequest) returns (CreateTeamMemberInvitationResponse);
+  rpc GetTeamMember(GetTeamMemberRequest) returns (GetTeamMemberResponse);
+  rpc UpdateTeamMember(UpdateTeamMemberRequest) returns (UpdateTeamMemberResponse);
+  rpc DeleteTeamMember(DeleteTeamMemberRequest) returns (DeleteTeamMemberResponse);
+  
+  // Project Members
+  rpc CreateProjectMemberInvitation(ProjectMemberInvitationRequest) returns (ProjectMemberInvitationResponse);
+  rpc GetProjectMember(GetProjectMemberRequest) returns (GetProjectMemberResponse);
+  rpc UpdateProjectMember(UpdateProjectMemberRequest) returns (UpdateProjectMemberResponse);
+  rpc DeleteProjectMember(DeleteProjectMemberRequest) returns (DeleteProjectMemberResponse);
+  
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+}
