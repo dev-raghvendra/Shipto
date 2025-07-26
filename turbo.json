@@ -34,8 +34,8 @@
     },
     "proto:gen":{
       "dependsOn": ["^proto:gen"],
-      "inputs": ["proto/**/*.proto"],
-      "outputs": ["src/generated/**"]
+      "inputs": ["src/proto/**/*.proto"],
+      "outputs": ["generated/**"]
     }
   }
 }

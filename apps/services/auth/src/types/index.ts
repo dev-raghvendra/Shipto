@@ -16,7 +16,7 @@ export const UserSchema = z.object({
 export const TeamSchema = z.object({
   teamName: z.string(),
   description: z.string().optional().nullable(),
-  planType: z.string().default("free").optional()
+  planType: z.string().default("free")
 }).strict()
 
 export const TeamMemberInvitationSchema = z.object({

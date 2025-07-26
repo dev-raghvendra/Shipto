@@ -2,15 +2,11 @@
   "name": "@shipto/proto",
   "version": "1.0.0",
   "description": "",
-  "main": "generated/index.js",
-  "types": "generated/index.d.ts",
+  "main": "index.ts",
   "scripts": {
-    "proto:gen": "pnpm run clean && pnpm run generate",
-    "clean": "rm -rf generated && mkdir generated",
-    "generate": "npm run gen:js && npm run gen:ts && npm run gen:index",
-    "gen:js": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:generated --grpc_out=grpc_js:generated --plugin=protoc-gen-grpc=node_modules/.bin/grpc_tools_node_protoc_plugin src/proto/*.proto",
-    "gen:ts": "grpc_tools_node_protoc --plugin=protoc-gen-ts=node_modules/.bin/protoc-gen-ts --ts_out=grpc_js:generated src/proto/*.proto",
-    "gen:index": "node src/scripts/generate-index.js"
+   "proto:gen": "npm run clean && npm run generate",
+    "clean": "rm -rf generated && mkdir -p generated",
+    "generate": "grpc_tools_node_protoc --plugin=protoc-gen-ts=node_modules/.bin/protoc-gen-ts --ts_out=grpc_js:generated/ -I src/proto/ src/proto/*.proto"
   },
   "keywords": [],
   "author": "",
