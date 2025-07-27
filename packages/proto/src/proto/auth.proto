@@ -1,12 +1,10 @@
 syntax = "proto3";
 
-package auth;
-
 message User {
   string fullname = 1;
   string email = 2;
   string avatarUri = 3;
-  bool   emailVerified = 4;
+  bool emailVerified = 4;
   string createdAt = 5;
   string updatedAt = 6;
   string provider = 7;
@@ -23,7 +21,9 @@ message Tokens {
 }
 
 message LoginResponse {
-  Tokens tokens = 1;
+  int32 code = 1;
+  string message = 2;
+  Tokens res = 3;
 }
 
 message SigninRequest {
@@ -31,16 +31,22 @@ message SigninRequest {
   string email = 2;
   string password = 3;
   string avatarUri = 4;
-  bool   emailVerified = 5;
+  bool emailVerified = 5;
   string provider = 6;
 }
 
-message GetUserResponse {
+message GetUserResponseData {
   string fullname = 1;
   string email = 2;
   string avatarUri = 3;
   string createdAt = 4;
   string updatedAt = 5;
+}
+
+message GetUserResponse {
+  int32 code = 1;
+  string message = 2;
+  GetUserResponseData res = 3;
 }
 
 message GetMeRequest {
@@ -53,12 +59,12 @@ message GetUserRequest {
 }
 
 message RefreshTokenRequest {
-  User   user = 1;
+  User user = 1;
   string refreshToken = 2;
 }
 
 message CreateTeamRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string teamName = 2;
   string description = 3;
 }
@@ -72,28 +78,40 @@ message Team {
   string updatedAt = 6;
 }
 
+message GetTeamResponse {
+  int32 code = 1;
+  string message = 2;
+  Team res = 3;
+}
+
 message GetTeamRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string teamId = 2;
 }
 
 message DeleteTeamRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string teamId = 2;
 }
 
-message DeleteTeamResponse {
+message DeleteTeamResponseData {
   string message = 1;
 }
 
+message DeleteTeamResponse {
+  int32 code = 1;
+  string message = 2;
+  DeleteTeamResponseData res = 3;
+}
+
 message CreateTeamMemberInvitationRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string targetUserId = 2;
   string teamId = 3;
   string role = 4;
 }
 
-message CreateTeamMemberInvitationResponse {
+message CreateTeamMemberInvitationResponseData {
   string inviteId = 1;
   string role = 2;
   string teamId = 3;
@@ -102,42 +120,66 @@ message CreateTeamMemberInvitationResponse {
   string updatedAt = 6;
 }
 
-message GetTeamMemberResponse {
+message CreateTeamMemberInvitationResponse {
+  int32 code = 1;
+  string message = 2;
+  CreateTeamMemberInvitationResponseData res = 3;
+}
+
+message GetTeamMemberResponseData {
   string memberId = 1;
   string userId = 2;
   string teamId = 3;
+  string role = 4;
+}
+
+message GetTeamMemberResponse {
+  int32 code = 1;
+  string message = 2;
+  GetTeamMemberResponseData res = 3;
+}
+
+message GetProjectMemberResponseData {
+  string memberId = 1;
+  string userId = 2;
+  string projectId = 3;
   string role = 4;
 }
 
 message GetProjectMemberResponse {
-  string memberId = 1;
-  string userId = 2;
-  string projectId = 3;
-  string role = 4;
+  int32 code = 1;
+  string message = 2;
+  GetProjectMemberResponseData res = 3;
 }
 
 message GenericGetMemberRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string memberId = 2;
 }
 
 message GenericDeleteMemberRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string memberId = 2;
 }
 
-message GenericDeleteMemberResponse {
+message GenericDeleteMemberResponseData {
   string message = 1;
 }
 
+message GenericDeleteMemberResponse {
+  int32 code = 1;
+  string message = 2;
+  GenericDeleteMemberResponseData res = 3;
+}
+
 message ProjectMemberInvitationRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string targetUserId = 2;
   string projectId = 3;
   string role = 4;
 }
 
-message CreateProjectMemberInvitationResponse {
+message CreateProjectMemberInvitationResponseData {
   string inviteId = 1;
   string role = 2;
   string projectId = 3;
@@ -146,14 +188,27 @@ message CreateProjectMemberInvitationResponse {
   string updatedAt = 6;
 }
 
+message CreateProjectMemberInvitationResponse {
+  int32 code = 1;
+  string message = 2;
+  CreateProjectMemberInvitationResponseData res = 3;
+}
+
 message DeleteProjectRequest {
-  User   authUserData = 1;
+  User authUserData = 1;
   string projectId = 2;
 }
 
-message DeleteProjectResponse {
+message DeleteProjectResponseData {
   string message = 1;
 }
+
+message DeleteProjectResponse {
+  int32 code = 1;
+  string message = 2;
+  DeleteProjectResponseData res = 3;
+}
+
 
 service AuthService {
   // Authentication

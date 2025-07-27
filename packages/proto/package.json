@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-   "proto:gen": "npm run clean && npm run generate",
+    "proto:gen": "npm run clean && npm run generate",
     "clean": "rm -rf generated && mkdir -p generated",
     "generate": "grpc_tools_node_protoc --plugin=protoc-gen-ts=node_modules/.bin/protoc-gen-ts --ts_out=grpc_js:generated/ -I src/proto/ src/proto/*.proto"
   },
@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/google-protobuf": "^3.15.12",
     "grpc-tools": "^1.13.0",
     "protoc-gen-ts": "^0.8.7"
   },

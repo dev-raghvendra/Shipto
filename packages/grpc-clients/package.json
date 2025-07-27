@@ -1,5 +1,5 @@
 {
-  "name": "grpc-clients",
+  "name": "@shipto/grpc-clients",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
