@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 message User {
-  string fullname = 1;
+  string fullName = 1;
   string email = 2;
   string avatarUri = 3;
   bool emailVerified = 4;
@@ -27,16 +27,15 @@ message LoginResponse {
 }
 
 message SigninRequest {
-  string fullname = 1;
+  string fullName = 1;
   string email = 2;
   string password = 3;
   string avatarUri = 4;
-  bool emailVerified = 5;
   string provider = 6;
 }
 
 message GetUserResponseData {
-  string fullname = 1;
+  string fullName = 1;
   string email = 2;
   string avatarUri = 3;
   string createdAt = 4;
@@ -49,9 +48,6 @@ message GetUserResponse {
   GetUserResponseData res = 3;
 }
 
-message GetMeRequest {
-  string userId = 1;
-}
 
 message GetUserRequest {
   User authUserData = 1;
@@ -209,6 +205,10 @@ message DeleteProjectResponse {
   DeleteProjectResponseData res = 3;
 }
 
+message BodyLessRequests {
+  User authUserData = 1;
+}
+
 
 service AuthService {
   // Authentication
@@ -216,7 +216,7 @@ service AuthService {
   rpc Signin(SigninRequest) returns (LoginResponse);
   rpc OAuth(SigninRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc GetMe(GetMeRequest) returns (User);
+  rpc GetMe(BodyLessRequests) returns (User);
   rpc RefreshToken(RefreshTokenRequest) returns (Tokens);
 
   // Team Management

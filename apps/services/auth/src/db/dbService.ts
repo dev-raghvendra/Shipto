@@ -1,9 +1,11 @@
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import passHashMiddleware from "./middleware";
 import { v4 as uuid } from "uuid";
 import {
     EmailPassLoginBody,
+    GetTeamMemberRequestSchemaType,
     ProjectMemberInvitationBody,
+    SigninRequestSchemaType,
     TeamBody,
     TeamMemberInvitationBody,
     UserBody,
@@ -28,7 +30,7 @@ class Database {
 
 
 
-     createUser(body: UserBody) {
+     createUser(body: SigninRequestSchemaType) {
         return  this._client.user.create({
                 data: {
                     userId: this._generateId("User"),
@@ -47,8 +49,8 @@ class Database {
           })
      }
 
-     findUniqueUserById(userId:string){
-        return this._client.user.findUniqueOrThrow({where:{userId}})
+     findUniqueUserById(userId:string,select?:Prisma.UserSelect){
+        return this._client.user.findUniqueOrThrow({where:{userId},select})
      }
 
      findUsers(where:Prisma.UserWhereInput,select:Prisma.UserSelect){
@@ -64,7 +66,7 @@ class Database {
                     teamMembers: {
                         create: [
                             {
-                                memberId: this._generateId("Team"),
+                                memberId: this._generateId("TeamMember"),
                                 role: "ADMIN",
                                 userId: body.userId,
                             },
@@ -74,7 +76,23 @@ class Database {
       });
     }
 
+     deleteTeamById(teamId:string){
+        return this._client.team.delete({
+            where:{
+                teamId
+            }
+        })
+     }
+     findUniqueTeamById(teamId:string,select?:Prisma.TeamSelect){
+         return this._client.team.findUniqueOrThrow({where:{teamId},select})
+     }
 
+
+     findTeamMember(where:Prisma.TeamMemberWhereInput,select?:Prisma.TeamMemberSelect){
+         return this._client.teamMember.findFirstOrThrow({where,select})
+     }
+
+    
      createTeamInvitation(body: TeamMemberInvitationBody) {
         return  this._client.teamMemberInvitation.create({
                 data: {

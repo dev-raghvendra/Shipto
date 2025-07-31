@@ -103,6 +103,9 @@ importers:
       '@shipto/proto':
         specifier: workspace:*
         version: link:../../../packages/proto
+      '@shipto/services-commons':
+        specifier: workspace:*
+        version: link:../../../packages/services-commons
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -226,6 +229,15 @@ importers:
       protoc-gen-ts:
         specifier: ^0.8.7
         version: 0.8.7
+
+  packages/services-commons:
+    dependencies:
+      '@grpc/grpc-js':
+        specifier: ^1.13.4
+        version: 1.13.4
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
 
   packages/typescript-config: {}
 

@@ -1,7 +1,7 @@
 import SECRETS from "conf/secrets"
 import jwt from "jsonwebtoken"
 
-export function createJwt(payload : Object,expiry?:string | "1h" ){
+export function createJwt(payload : Object,expiry?:string | "1d" ){
     return jwt.sign({payload,expiry},SECRETS.JWT_SECRET);
 }
 
