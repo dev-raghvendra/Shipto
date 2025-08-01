@@ -44,6 +44,7 @@ model TeamMember {
 }
 
 model ProjectMember {
+  memberId  String @id  @default(uuid())
   userId    String
   role      RoleType
   projectId String
@@ -53,7 +54,6 @@ model ProjectMember {
 
   user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
-  @@id([userId, projectId])
 }
 
 model TeamMemberInvitation {

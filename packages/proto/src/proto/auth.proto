@@ -209,6 +209,11 @@ message BodyLessRequests {
   User authUserData = 1;
 }
 
+message AcceptInvitationRequest {
+   User authUserData = 1;
+   string inviteId = 2;
+}
+
 
 service AuthService {
   // Authentication
@@ -228,11 +233,13 @@ service AuthService {
   rpc CreateTeamMemberInvitation(CreateTeamMemberInvitationRequest) returns (CreateTeamMemberInvitationResponse);
   rpc GetTeamMember(GenericGetMemberRequest) returns (GetTeamMemberResponse);
   rpc DeleteTeamMember(GenericDeleteMemberRequest) returns (GenericDeleteMemberResponse);
-
+  rpc AcceptTeamInvitation(AcceptInvitationRequest) returns (GetTeamMemberResponse);
+  
   // Project Members
   rpc CreateProjectMemberInvitation(ProjectMemberInvitationRequest) returns (CreateProjectMemberInvitationResponse);
   rpc GetProjectMember(GenericGetMemberRequest) returns (GetProjectMemberResponse);
   rpc DeleteProjectMember(GenericDeleteMemberRequest) returns (GenericDeleteMemberResponse);
+  rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);
 
   rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
 

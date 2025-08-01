@@ -1,16 +1,10 @@
 import { z } from 'zod';
 
+/* =========================
+  USER
+  ========================= */
 export const Providers = z.enum(['GOOGLE', 'GITHUB', 'EMAIL']);
 export type ProvidersType = z.infer<typeof Providers>;
-
-export const ProjectMemberInvitationRoles = z.enum(['OWNER', 'ADMIN', 'DEVELOPER', 'VIEWER']);
-export type ProjectMemberInvitationRolesType = z.infer<typeof ProjectMemberInvitationRoles>;
-
-export const Scopes = z.enum(['PROJECT','DEPLOYMENT','TEAM','TEAM_MEMBER','PROJECT_MEMBER','TEAM_LINK']);
-export type ScopesType = z.infer<typeof Scopes>;
-
-export const TeamMemberInvitationRoles = ProjectMemberInvitationRoles.exclude(['OWNER']);
-export type TeamMemberInvitationRolesType = z.infer<typeof TeamMemberInvitationRoles>;
 
 export const UserSchema = z.object({
   fullName: z.string(),
@@ -22,39 +16,14 @@ export const UserSchema = z.object({
   provider: Providers,
 }).strict();
 export type UserSchemaType = z.infer<typeof UserSchema>;
-
-export const TeamSchema = z.object({
-  teamName: z.string(),
-  description: z.string().optional().nullable()
-}).strict();
-export type TeamSchemaType = z.infer<typeof TeamSchema>;
-
-export const TeamMemberInvitationSchema = z.object({
-  userId: z.string(),
-  teamId: z.string(),
-  role: TeamMemberInvitationRoles
-}).strict();
-export type TeamMemberInvitationSchemaType = z.infer<typeof TeamMemberInvitationSchema> & {
-  authUserData:UserBody};
-
-export const ProjectMemberInvitationSchema = z.object({
-  userId: z.string(),
-  role: ProjectMemberInvitationRoles,
-  projectId: z.string(),
-}).strict();
-export type ProjectMemberInvitationSchemaType = z.infer<typeof ProjectMemberInvitationSchema>;
-
-export const TokensSchema = z.object({
-  refreshToken: z.string(),
-  accessToken: z.string(),
-}).strict();
-export type TokensSchemaType = z.infer<typeof TokensSchema>;
+export type UserBody = z.infer<typeof UserSchema>;
 
 export const EmailPassLoginSchema = z.object({
   email: z.email(),
   password: z.string()
 }).strict();
 export type EmailPassLoginSchemaType = z.infer<typeof EmailPassLoginSchema>;
+export type EmailPassLoginBody = z.infer<typeof EmailPassLoginSchema>;
 
 export const SigninRequestSchema = z.object({
   fullName: z.string(),
@@ -63,7 +32,7 @@ export const SigninRequestSchema = z.object({
   avatarUri: z.string(),
   provider: Providers,
 }).strict();
-export type SigninRequestSchemaType = z.infer<typeof SigninRequestSchema> & { authUserData: UserBody };
+export type SigninRequestSchemaType = z.infer<typeof SigninRequestSchema>
 
 export const GetUserRequestSchema = z.object({
   targetUserId: z.string(),
@@ -74,6 +43,37 @@ export const RefreshTokenRequestSchema = z.object({
   refreshToken: z.string(),
 }).strict();
 export type RefreshTokenRequestSchemaType = z.infer<typeof RefreshTokenRequestSchema> & { authUserData: UserBody };
+
+export const TokensSchema = z.object({
+  refreshToken: z.string(),
+  accessToken: z.string(),
+}).strict();
+export type TokensSchemaType = z.infer<typeof TokensSchema>;
+
+/* =========================
+  TEAM
+  ========================= */
+export const TeamSchema = z.object({
+  teamName: z.string(),
+  description: z.string().optional().nullable()
+}).strict();
+export type TeamSchemaType = z.infer<typeof TeamSchema>;
+export type TeamBody = z.infer<typeof TeamSchema>;
+
+export const ProjectMemberInvitationRoles = z.enum(['OWNER', 'ADMIN', 'DEVELOPER', 'VIEWER']);
+export type ProjectMemberInvitationRolesType = z.infer<typeof ProjectMemberInvitationRoles>;
+export type RoleType = z.infer<typeof ProjectMemberInvitationRoles>;
+
+export const TeamMemberInvitationRoles = ProjectMemberInvitationRoles.exclude(['OWNER']);
+export type TeamMemberInvitationRolesType = z.infer<typeof TeamMemberInvitationRoles>;
+
+export const TeamMemberInvitationSchema = z.object({
+  userId: z.string(),
+  teamId: z.string(),
+  role: TeamMemberInvitationRoles
+}).strict();
+export type TeamMemberInvitationSchemaType = z.infer<typeof TeamMemberInvitationSchema> & { authUserData: UserBody };
+export type TeamMemberInvitationBody = z.infer<typeof TeamMemberInvitationSchema>;
 
 export const CreateTeamRequestSchema = z.object({
   teamName: z.string(),
@@ -101,16 +101,32 @@ export const DeleteTeamMemberRequestSchema = z.object({
 }).strict();
 export type DeleteTeamMemberRequestSchemaType = z.infer<typeof DeleteTeamMemberRequestSchema> & { authUserData: UserBody };
 
+export const AcceptMemberInviteSchema = z.object({
+  inviteId: z.string()
+});
+export type AcceptMemberInviteSchemaType = z.infer<typeof AcceptMemberInviteSchema> & { authUserData: UserBody };
+
+/* =========================
+  PROJECT
+  ========================= */
+export const Scopes = z.enum(['PROJECT', 'DEPLOYMENT', 'TEAM', 'TEAM_MEMBER', 'PROJECT_MEMBER', 'TEAM_LINK']);
+export type ScopesType = z.infer<typeof Scopes>;
+export type ScopeType = z.infer<typeof Scopes>;
+
+export const ProjectMemberInvitationSchema = z.object({
+  userId: z.string(),
+  role: ProjectMemberInvitationRoles,
+  projectId: z.string(),
+}).strict();
+export type ProjectMemberInvitationSchemaType = z.infer<typeof ProjectMemberInvitationSchema> & { authUserData: UserBody };
+export type ProjectMemberInvitationBody = z.infer<typeof ProjectMemberInvitationSchema>;
+
 export const DeleteProjectRequestSchema = z.object({
   projectId: z.string(),
 }).strict();
 export type DeleteProjectRequestSchemaType = z.infer<typeof DeleteProjectRequestSchema> & { authUserData: UserBody };
 
-// Existing types for convenience
-export type UserBody = z.infer<typeof UserSchema>;
-export type TeamBody = z.infer<typeof TeamSchema>;
-export type TeamMemberInvitationBody = z.infer<typeof TeamMemberInvitationSchema>;
-export type ProjectMemberInvitationBody = z.infer<typeof ProjectMemberInvitationSchema>;
-export type EmailPassLoginBody = z.infer<typeof EmailPassLoginSchema>;
-export type ScopeType = z.infer<typeof Scopes>;
-export type RoleType = z.infer<typeof ProjectMemberInvitationRoles>;
+/* =========================
+  UTIL
+  ========================= */
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
