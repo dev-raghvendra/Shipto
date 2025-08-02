@@ -1,13 +1,14 @@
 syntax = "proto3";
 
 message User {
-  string fullName = 1;
-  string email = 2;
-  string avatarUri = 3;
-  bool emailVerified = 4;
-  string createdAt = 5;
-  string updatedAt = 6;
-  string provider = 7;
+  string userId = 1;
+  string fullName = 2;
+  string email = 3;
+  string avatarUri = 4;
+  bool emailVerified = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+  string provider = 8;
 }
 
 message LoginRequest {
@@ -19,6 +20,7 @@ message Tokens {
   string refreshToken = 1;
   string accessToken = 2;
 }
+
 
 message LoginResponse {
   int32 code = 1;
@@ -99,6 +101,11 @@ message DeleteTeamResponse {
   string message = 2;
   DeleteTeamResponseData res = 3;
 }
+message CreateTeamResponse {
+  int32 code = 1;
+  string message = 2;
+  Team res = 3;
+}
 
 message CreateTeamMemberInvitationRequest {
   User authUserData = 1;
@@ -168,7 +175,7 @@ message GenericDeleteMemberResponse {
   GenericDeleteMemberResponseData res = 3;
 }
 
-message ProjectMemberInvitationRequest {
+message CreateProjectMemberInvitationRequest {
   User authUserData = 1;
   string targetUserId = 2;
   string projectId = 3;
@@ -215,18 +222,19 @@ message AcceptInvitationRequest {
 }
 
 
+
 service AuthService {
   // Authentication
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Signin(SigninRequest) returns (LoginResponse);
   rpc OAuth(SigninRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc GetMe(BodyLessRequests) returns (User);
-  rpc RefreshToken(RefreshTokenRequest) returns (Tokens);
+  rpc GetMe(BodyLessRequests) returns (GetUserResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
 
   // Team Management
-  rpc CreateTeam(CreateTeamRequest) returns (Team);
-  rpc GetTeam(GetTeamRequest) returns (Team);
+  rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
+  rpc GetTeam(GetTeamRequest) returns (GetTeamResponse);
   rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
 
   // Team Members
@@ -236,7 +244,7 @@ service AuthService {
   rpc AcceptTeamInvitation(AcceptInvitationRequest) returns (GetTeamMemberResponse);
   
   // Project Members
-  rpc CreateProjectMemberInvitation(ProjectMemberInvitationRequest) returns (CreateProjectMemberInvitationResponse);
+  rpc CreateProjectMemberInvitation(CreateProjectMemberInvitationRequest) returns (CreateProjectMemberInvitationResponse);
   rpc GetProjectMember(GenericGetMemberRequest) returns (GetProjectMemberResponse);
   rpc DeleteProjectMember(GenericDeleteMemberRequest) returns (GenericDeleteMemberResponse);
   rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);

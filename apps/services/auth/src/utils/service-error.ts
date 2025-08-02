@@ -4,13 +4,15 @@ import AuthResponse from "utils/response";
 export const PrismaErrorCode = {
     ALREADY_EXISTS:      "P2002",
     NOT_FOUND:           "P2025",
-    PERMISSION_DENIED:   "42501", // Postgres permission denied SQLSTATE
+    PERMISSION_DENIED:   "42501",
+    BAD_REQUEST : "400"
 } as const;
 
 export const PrismaErrorCodeReverse = {
     "P2002":   "ALREADY_EXISTS",
     "P2025":   "NOT_FOUND",
     "42501":   "PERMISSION_DENIED",
+    "400"   : "BAD_REQUEST"
 } as const;
 
 export type OverrideMap = {
@@ -50,6 +52,11 @@ export function HandleServiceErrors(
                 return AuthResponse.FORBIDDEN(
                     null,
                     msg || `${name} does not have permissions.`
+                );
+            case "400":
+                return AuthResponse.UN_AUTHENTICATD(
+                    null,
+                    msg || `${name} is not authenticated.`
                 );
             default:
                 return AuthResponse.INTERNAL();

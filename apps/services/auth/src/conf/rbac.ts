@@ -1,9 +1,9 @@
-import { RoleType, ScopeType } from "types";
+import { RoleTypeGenericType, ScopeType } from "types/utility";
 import { PermissionType } from "@prisma/index";
 
 type T_RBAC_CONFIG = {
     [scope in ScopeType]: {
-        [role in RoleType]: {
+        [role in RoleTypeGenericType]: {
             permissions: PermissionType[];
         };
     };

@@ -36,6 +36,13 @@ class AuthServiceResponse {
             message
         }
      }
+     UN_AUTHENTICATD<t>(r:t,message?:string){
+        return {
+            code:status.UNAUTHENTICATED,
+            res:r,
+            message
+        }
+     }
 }
 
 const AuthResponse = new AuthServiceResponse();

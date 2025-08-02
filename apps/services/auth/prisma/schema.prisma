@@ -60,8 +60,8 @@ model TeamMemberInvitation {
   inviteId   String      @id @default(uuid())
   role       RoleType
   teamId     String
-  status     InviteStatus
   createdAt  DateTime?   @default(now())
+  expiresAt  DateTime    @default(dbgenerated("(now() + interval '7 days')"))
   updatedAt  DateTime?   @default(now())
   // teamMemberPermissionOverride  TeamMemberPermissionOverride[]
 
@@ -72,8 +72,8 @@ model ProjectMemberInvitation {
   inviteId    String      @id @default(uuid())
   role        RoleType
   projectId   String
-  status      InviteStatus
   createdAt   DateTime?   @default(now())
+  expiresAt   DateTime?    @default(dbgenerated("(now() + interval '7 days')"))
   updatedAt   DateTime?   @default(now())
 }
 
@@ -117,10 +117,6 @@ enum ScopeType {
   TEAM_LINK
 }
 
-enum InviteStatus {
-  ACCEPTED
-  PENDING
-}
 
 // model ProjectMemberPermissionOverride {
 //   permissionId          String @id @default(uuid())
