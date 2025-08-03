@@ -57,13 +57,14 @@ export function createValidator<Map extends SchemaMap>(schemaMap: Map) {
       try {
         const raw = extractRequestData(call.request);
         const schema = schemaMap[method].schema;
+        console.log("RAW BODY:",raw);
         const parsed = await parseAsync(schema, raw);
 
         const callWithBody = call as unknown as ValidatedCall<Map, K, TReq, TRes>;
         (callWithBody.request as any).body = parsed;
-
         handler(callWithBody, callback);
-      } catch{
+      } catch(e){
+        console.log("ERROR:",e)
         callback({
           code: status.INVALID_ARGUMENT,
           message: schemaMap[method].errMsg || "Invalid argument",

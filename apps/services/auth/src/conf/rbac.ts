@@ -1,4 +1,4 @@
-import { ScopeType } from "types/utility";
+import { ScopeType } from "types/user";
 import { TeamRoleType } from "types/team";
 import { ProjectRoleType } from "types/project";
 import { PermissionType } from "@prisma/index";

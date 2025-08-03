@@ -4,7 +4,7 @@ import RBAC_CONFIG from "conf/rbac";
 import dbService from "db/dbService";
 import { ProjectRoleType } from "types/project";
 import { TeamRoleType } from "types/team";
-import { ScopeType } from "types/utility";
+import { ScopeType } from "types/user";
 
 interface PermissionRequest {
     userId : string;

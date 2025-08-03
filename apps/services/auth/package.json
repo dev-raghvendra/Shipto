@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register ./src/server.ts",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "migrate:dev":""
   },
   "keywords": [],
   "author": "",

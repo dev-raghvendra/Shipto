@@ -7,6 +7,7 @@ import { HandleServiceErrors } from "utils/service-error";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType } from "types/user";
 import { HasPermissionsRequestBodyType } from "types/utility";
 import { PermissionBase } from "utils/rbac-utils";
+import { convertDatesToISO } from "@shipto/services-commons";
 
 class AuthService {
 
@@ -36,7 +37,9 @@ class AuthService {
 
     async login(body: EmailPassLoginRequestBodyType) {
         try {
-            const u = await dbService.findUniqueUser({where:{email:body.email} ,select: {createdAt:false,updatedAt:false,_count:false }});
+            const u = await dbService.findUniqueUser({
+                where:{email:body.email}
+            });
             const isVerified = await compare(body.password,u.password)
             if(!isVerified) throw new PrismaClientKnownRequestError("Invalid pass",{code:"P2025",clientVersion:"4"})
             const {password, ...user} = u;
@@ -63,7 +66,15 @@ class AuthService {
     
     async GetUser(body:GetUserRequestBodyType){
         try {
-            const u = await dbService.findUniqueUserById(body.targetUserId,{password:false,createdAt:false,updatedAt:false,_count:false});
+            const u = await dbService.findUniqueUserById(body.targetUserId,{
+                userId:true,
+                avatarUri:true,
+                fullName:true,
+                createdAt:true,
+                updatedAt:true,
+                email:true
+            });
+            convertDatesToISO.apply(u)
             return AuthResponse.OK(u,"User found");
         } catch (e) {
            return HandleServiceErrors(e,"User");
@@ -72,7 +83,19 @@ class AuthService {
 
     async GetMe(userId:string){
         try {
-            const u = await dbService.findUniqueUserById(userId,{createdAt:false,updatedAt:false})
+            const u = await dbService.findUniqueUserById(userId,{
+                userId:true,
+                fullName:true,
+                avatarUri:true,
+                email:true,
+                provider:true,
+                createdAt:true,
+                updatedAt:true,
+                password:true,
+                teamMembers:true,
+                projectMembers:true
+            })
+            convertDatesToISO.apply(u)
             return AuthResponse.OK(u,"User found");
         } catch (e) {
             return HandleServiceErrors(e,"User")

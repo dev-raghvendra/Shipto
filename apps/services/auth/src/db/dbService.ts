@@ -28,7 +28,14 @@ class Database {
                 ...body,
             },
             select: {
-                password: false,
+                userId:true,
+               avatarUri:true,
+               fullName:true,
+               email:true,
+               emailVerified:true,
+               createdAt:true,
+               provider:true,
+               updatedAt:true
             },
         });
     }

@@ -1,6 +1,6 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
-import {BodyLessRequests, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
+import {BodyLessRequests, GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType, UserBody } from "types/user";
 import { HasPermissionsRequestBodyType } from "types/utility";
 
@@ -12,7 +12,6 @@ class AuthHandlers {
 
     async handleLogin(call:ServerUnaryCall<LoginRequest & {body:EmailPassLoginRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){
         try {
-            
             const {code,res,message} = await this._authService.login(call.request.body);
             if(code!==status.OK){
                 return callback({
@@ -76,12 +75,12 @@ class AuthHandlers {
         }
     }
 
-    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:{authUserData:UserBody}},GetUserResponse>,callback:sendUnaryData<GetUserResponse>){
+    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequests},GetCurrentUserResponse>,callback:sendUnaryData<GetCurrentUserResponse>){
        try {
           const {code,res,message} = await this._authService.GetMe(call.request.authUserData.userId)
           if(code!==status.OK) return callback({code,message});
-          const data = new GetUserResponseData(res as Object)
-          const response = new GetUserResponse({code,message,res:data})
+          const data = new GetCurrentUserResponseData(res as Object)
+          const response = new GetCurrentUserResponse({code,message,res:data})
           callback(null,response)
         } catch (e) {
           return callback({
@@ -89,6 +88,7 @@ class AuthHandlers {
                 message:"Internal server e"
           })  
         }
+
     }
 
     async handleRefreshToken(call:ServerUnaryCall<RefreshTokenRequest & {body:RefreshTokenRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){

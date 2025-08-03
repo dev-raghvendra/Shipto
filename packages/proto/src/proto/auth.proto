@@ -31,6 +31,26 @@ message GetUserResponse {
   GetUserResponseData res = 3;
 }
 
+message GetCurrentUserResponseData {
+  string fullName = 1;
+  string email = 2;
+  string avatarUri = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+  string password = 6;
+  bool emailVerified = 7;
+  string userId = 8;
+  repeated GetTeamMemberResponseData teamMembers = 9;
+  repeated GetProjectMemberResponse  projectMembers = 10;
+}
+
+
+message GetCurrentUserResponse {
+  int32 code = 1;
+  string message = 2;
+  GetCurrentUserResponseData res = 3;
+}
+
 message BodyLessRequests {
   User authUserData = 1;
 }
@@ -259,7 +279,7 @@ service AuthService {
   rpc Signin(SigninRequest) returns (LoginResponse);
   rpc OAuth(SigninRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc GetMe(BodyLessRequests) returns (GetUserResponse);
+  rpc GetMe(BodyLessRequests) returns (GetCurrentUserResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
 
   // Team Management
