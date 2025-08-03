@@ -19,6 +19,7 @@ server.addService(UnimplementedAuthServiceService.definition,{
     GetUser:validateRPCBody("GetUser",authhandlers.handleGetUser),
     GetMe:validateRPCBody("GetMe",authhandlers.handleGetMe),
     RefreshToken:validateRPCBody("RefreshToken",authhandlers.handleRefreshToken),
+    HasPermissions:validateRPCBody("HasPermissions",authhandlers.handleHasPermissions),
 
     CreateTeam:validateRPCBody("CreateTeam",teamHandlers.handleCreateTeam),
     GetTeam:validateRPCBody("GetTeam",teamHandlers.handleGetTeam),

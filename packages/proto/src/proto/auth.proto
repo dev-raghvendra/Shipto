@@ -239,6 +239,19 @@ message DeleteProjectMemberResponse {
   DeleteProjectMemberResponseData res = 3;
 }
 
+message HasPermissionsRequest {
+   string scope = 1;
+   repeated string permissions = 2;
+   string resourceId = 3;
+   User authUserData = 4;
+}
+
+message HasPermissionsResponse {
+   int32 code = 1;
+   string message = 2;
+   bool res = 3;
+}
+
 // AuthService definition
 service AuthService {
   // Authentication
@@ -266,6 +279,7 @@ service AuthService {
   rpc DeleteProjectMember(DeleteProjectMemberRequest) returns (DeleteProjectMemberResponse);
   rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);
 
+  rpc HasPermissions(HasPermissionsRequest) returns (HasPermissionsResponse);
   // Future: partial decentralized RBAC
   // rpc UpdateTeamMember(UpdateTeamMemberRequest) returns (UpdateTeamMemberResponse);
   // rpc UpdateProjectMember(UpdateProjectMemberRequest) returns (UpdateProjectMemberResponse);

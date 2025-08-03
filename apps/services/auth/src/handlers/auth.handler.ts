@@ -1,7 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
-import {BodyLessRequests, GetUserRequest, GetUserResponse, GetUserResponseData, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
+import {BodyLessRequests, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType, UserBody } from "types/user";
+import { HasPermissionsRequestBodyType } from "types/utility";
 
 class AuthHandlers {
     private _authService;
@@ -102,6 +103,20 @@ class AuthHandlers {
                 code:status.INTERNAL,
                 message:"Internal server e"
             })
+        }
+    }
+
+    async handleHasPermissions(call:ServerUnaryCall<HasPermissionsRequest & {body:HasPermissionsRequestBodyType},HasPermissionsResponse>,callback:sendUnaryData<HasPermissionsResponse>){
+        try {
+            const {code,res,message} = await this._authService.hasPermissions(call.request.body);
+            if(code!==status.OK) return callback({message,code});
+            const response = new HasPermissionsResponse({res:res as boolean,code,message});
+            return callback(null,response)
+        } catch (e) {
+          return callback({
+                code:status.INTERNAL,
+                message:"Internal server e"
+          })  
         }
     }
 }

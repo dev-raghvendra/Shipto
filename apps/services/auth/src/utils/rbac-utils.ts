@@ -25,7 +25,7 @@ interface UserMembershipData {
     }>
 }
 
-class PermissionBase {
+export class PermissionBase {
      async canAccess(request:PermissionRequest){
         try {
             const membershipData = await this.fetchUserMembershipData(request.userId)

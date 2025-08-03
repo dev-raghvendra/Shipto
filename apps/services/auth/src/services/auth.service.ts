@@ -5,8 +5,16 @@ import AuthResponse from "utils/response";
 import { compare } from "libs/bcrypt";
 import { HandleServiceErrors } from "utils/service-error";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType } from "types/user";
+import { HasPermissionsRequestBodyType } from "types/utility";
+import { PermissionBase } from "utils/rbac-utils";
 
 class AuthService {
+
+    private _permissions : PermissionBase
+
+    constructor(){
+        this._permissions = new PermissionBase()
+    }
 
     private createSession(u: any) {
         return AuthResponse.OK({
@@ -79,6 +87,20 @@ class AuthService {
       }
     }
 
+    async hasPermissions({authUserData:{userId},resourceId,permissions,scope,targetUserId}:HasPermissionsRequestBodyType){
+     try {
+        const has = await this._permissions.canAccess({
+            userId,
+            resourceId,
+            permission:permissions,
+            scope,
+            targetUserId
+        })
+        return AuthResponse.OK(has,"Permission derived");
+     } catch (error) {
+        return HandleServiceErrors(error,"User")
+     }
+    }
 }
 
 export default AuthService;

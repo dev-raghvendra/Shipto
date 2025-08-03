@@ -1,7 +1,7 @@
 import { ProjectMemberInvitationRequestSchema } from "types/project"
 import { CreateTeamRequestSchema, DeleteTeamMemberRequestSchema, DeleteTeamRequestSchema, GetTeamMemberRequestSchema, GetTeamRequestSchema, TeamMemberInvitationRequestSchema } from "types/team"
 import { EmailPassLoginRequestSchema, SigninRequestSchema, GetUserRequestSchema, RefreshTokenRequestSchema } from "types/user"
-import { AcceptMemberInviteRequestSchema, BodyLessRequestsSchema } from "types/utility"
+import { AcceptMemberInviteRequestSchema, BodyLessRequestsSchema, HasPermissionsRequestSchema } from "types/utility"
 import { ZodObject, ZodType,z } from "zod"
 
 export type RPCs = 
@@ -22,6 +22,7 @@ export type RPCs =
     | "DeleteProjectMember"
     | "AcceptTeamInvitation"
     | "AcceptProjectInvitation"
+    | "HasPermissions"
 
 type RPC_SCHEMA_T = {
     [K in RPCs]: {
@@ -58,5 +59,6 @@ export const RPC_SCHEMA: RPC_SCHEMA_T = {
     GetProjectMember: createRPCEntry(GetTeamMemberRequestSchema),
     DeleteProjectMember: createRPCEntry(DeleteTeamMemberRequestSchema),
     AcceptTeamInvitation:createRPCEntry(AcceptMemberInviteRequestSchema),
-    AcceptProjectInvitation:createRPCEntry(AcceptMemberInviteRequestSchema)
+    AcceptProjectInvitation:createRPCEntry(AcceptMemberInviteRequestSchema),
+    HasPermissions:createRPCEntry(HasPermissionsRequestSchema)
 } as const
