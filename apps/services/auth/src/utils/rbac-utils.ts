@@ -156,7 +156,7 @@ class PermissionBase {
   
      private async checkViaTeamMembership(projectId:string,scope:ScopeType,permission:PermissionType[],membershipData:UserMembershipData){
         const teamIds = membershipData.teamMemberships.map(tm=>tm.teamId)
-        const teamLinks = await dbService.findTeamlinks({
+        const teamLinks = await dbService.findTeamLinks({
             where:{
                 teamId:{
                     in:teamIds
@@ -175,7 +175,7 @@ class PermissionBase {
 
      private async checkViaProjectMembership(teamId:string,scope:ScopeType,permission:PermissionType[],membershipData:UserMembershipData){
         const projectIds = membershipData.projectMemberships.map(pm=>pm.projectId);
-        const teamLinks = await dbService.findTeamlinks({
+        const teamLinks = await dbService.findTeamLinks({
             where:{
                 projectId:{
                     in:projectIds
