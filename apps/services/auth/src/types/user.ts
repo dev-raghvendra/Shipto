@@ -30,15 +30,18 @@ export type SigninRequestBodyType = z.infer<typeof SigninRequestSchema>
 
 export const GetUserRequestSchema = z.object({
   targetUserId: z.string(),
+  authUserData:UserSchema
 }).strict();
-export type GetUserRequestBodyType = z.infer<typeof GetUserRequestSchema> & { authUserData: UserBody };
-export type GetUserRequestDBBodyType = z.infer<typeof GetUserRequestSchema>
+
+export type GetUserRequestBodyType = z.infer<typeof GetUserRequestSchema>;
+export type GetUserRequestDBBodyType = Omit<z.infer<typeof GetUserRequestSchema>,"authUserData">
 
 export const RefreshTokenRequestSchema = z.object({
   refreshToken: z.string(),
+  authUserData:UserSchema
 }).strict();
 
-export type RefreshTokenRequestBodyType = z.infer<typeof RefreshTokenRequestSchema> & { authUserData: UserBody };
+export type RefreshTokenRequestBodyType = z.infer<typeof RefreshTokenRequestSchema>
 
 export const TokensSchema = z.object({
   refreshToken: z.string(),

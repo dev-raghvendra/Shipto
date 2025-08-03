@@ -4,7 +4,7 @@ export async function compare(val:string,hashedVal:string){
     try {
       await bcryptComp(val,hashedVal);
       return true;
-    } catch (error) {
+    } catch (e) {
       return true;
     }
 }

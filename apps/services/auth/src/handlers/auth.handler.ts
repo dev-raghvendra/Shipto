@@ -1,7 +1,7 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
-import {BodyLessRequests, GetUserRequest, GetUserResponse, GetUserResponseData, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens, User} from "@shipto/proto";
-import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType } from "types/user";
+import {BodyLessRequests, GetUserRequest, GetUserResponse, GetUserResponseData, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
+import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType, UserBody } from "types/user";
 
 class AuthHandlers {
     private _authService;
@@ -22,10 +22,10 @@ class AuthHandlers {
             const tokens = new Tokens({accessToken : res?.tokens.accessToken ,refreshToken :res?.tokens.refreshToken });
             const response = new LoginResponse({code,message,res:tokens})
             return callback(null,response)
-        } catch (error) {
+        } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
               })
         }
     }
@@ -37,10 +37,10 @@ class AuthHandlers {
             const tokens = new Tokens({accessToken : res?.tokens.accessToken ,refreshToken :res?.tokens.refreshToken });
             const response = new LoginResponse({code,message,res:tokens})
             return callback(null,response)
-        } catch (error) {
+        } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
               })
         }
     } 
@@ -52,10 +52,10 @@ class AuthHandlers {
             const tokens = new Tokens({accessToken : res?.tokens.accessToken ,refreshToken :res?.tokens.refreshToken });
             const response = new LoginResponse({code,message,res:tokens})
             return callback(null,response)
-        } catch (error) {
+        } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
               })
         }
     }
@@ -67,25 +67,25 @@ class AuthHandlers {
             const data = new GetUserResponseData(res as Object)
             const response = new GetUserResponse({code,message,res:data})
             callback(null,response)
-        } catch (error) {
+        } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
           })  
         }
     }
 
-    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:GetUserRequestBodyType},GetUserResponse>,callback:sendUnaryData<GetUserResponse>){
+    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:{authUserData:UserBody}},GetUserResponse>,callback:sendUnaryData<GetUserResponse>){
        try {
           const {code,res,message} = await this._authService.GetMe(call.request.authUserData.userId)
           if(code!==status.OK) return callback({code,message});
           const data = new GetUserResponseData(res as Object)
           const response = new GetUserResponse({code,message,res:data})
           callback(null,response)
-        } catch (error) {
+        } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
           })  
         }
     }
@@ -97,10 +97,10 @@ class AuthHandlers {
             const tokens = new Tokens({accessToken : res?.tokens.accessToken ,refreshToken :res?.tokens.refreshToken });
             const response = new LoginResponse({code,message,res:tokens})
             return callback(null,response)
-        } catch (error) {
+        } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server error"
+                message:"Internal server e"
             })
         }
     }

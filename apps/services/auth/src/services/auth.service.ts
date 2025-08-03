@@ -7,6 +7,16 @@ import { HandleServiceErrors } from "utils/service-error";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType } from "types/user";
 
 class AuthService {
+
+    private createSession(u: any) {
+        return AuthResponse.OK({
+                tokens: {
+                    accessToken: createJwt(u),
+                    refreshToken: createJwt(u, "7d"),
+                },
+            },"Session created")
+    }
+
     async signIn(body: SigninRequestBodyType) {
         try {
             const u = await dbService.createUser(body);
@@ -64,19 +74,11 @@ class AuthService {
     async refreshToken(body:RefreshTokenRequestBodyType){
       try {
         return this.createSession(body.authUserData);
-      } catch (error) {
+      } catch (e) {
         return AuthResponse.INTERNAL()
       }
     }
 
-    private createSession(u: any) {
-        return AuthResponse.OK({
-                tokens: {
-                    accessToken: createJwt(u),
-                    refreshToken: createJwt(u, "7d"),
-                },
-            },"Session created")
-    }
 }
 
 export default AuthService;

@@ -1,3 +1,1 @@
-import { createValidator } from "./body-validatior.middleware";
-
-export {createValidator}
+export * from "./body-validatior.middleware"

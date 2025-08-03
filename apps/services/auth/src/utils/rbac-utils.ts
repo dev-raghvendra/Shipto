@@ -2,24 +2,25 @@ import { PermissionType, User } from "@prisma/index";
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import RBAC_CONFIG from "conf/rbac";
 import dbService from "db/dbService";
-import { RoleTypeGenericType, ScopeType } from "types/utility";
+import { ProjectRoleType } from "types/project";
+import { TeamRoleType } from "types/team";
+import { ScopeType } from "types/utility";
 
 interface PermissionRequest {
     userId : string;
     scope : ScopeType;
     permission : PermissionType[],
-    resourceId : string
+    resourceId : string,
+    targetUserId ? :string
 }
 
 interface UserMembershipData {
     teamMemberships : Array<{
-        memberId:string,
-        role:RoleTypeGenericType;
+        role:TeamRoleType;
         teamId:string;
     }>;
     projectMemberships:Array<{
-        memberId:string,
-        role:RoleTypeGenericType,
+        role:ProjectRoleType,
         projectId:string
     }>
 }
@@ -32,7 +33,7 @@ class PermissionBase {
                 return false;
             }
             return await this.evaluatePermissionByScope(request,membershipData)
-        } catch (error) {
+        } catch (e) {
             return false;
         }
      }
@@ -52,20 +53,18 @@ class PermissionBase {
                     select:{
                         teamId:true,
                         role:true,
-                        memberId:true
                     }
                 },
                 projectMembers:{
                     select:{
                         projectId:true,
-                        memberId:true,
                         role:true
                     }
                 }
             }
         }) as User & {teamMembers:[],projectMembers:[]}
         return {teamMemberships:user.teamMembers,projectMemberships:user.projectMembers}
-        } catch (error) {
+        } catch (e) {
             return {teamMemberships:[],projectMemberships:[]}
         }
      }
@@ -125,11 +124,11 @@ class PermissionBase {
 
      private async checkTeamMemberPermission(request:PermissionRequest, membershipData:UserMembershipData){
         const {resourceId:teamId,permission} = request;
-        const teamMembership = membershipData.teamMemberships.find(tm => tm.teamId === teamId);
-        if (teamMembership && this.hasRolePermission(teamMembership.role, 'TEAM_MEMBER', permission)) {
+        const hasDirectMembership = membershipData.teamMemberships.find(tm => tm.teamId === teamId);
+        if (hasDirectMembership && this.hasRolePermission(hasDirectMembership.role, 'TEAM_MEMBER', permission)) {
              return true;
         }
-        return false;
+        return this.checkViaProjectMembership(teamId,"TEAM_MEMBER",permission,membershipData);
      }
 
      private async checkTeamLinkPermission(request:PermissionRequest, membershipData:UserMembershipData){
@@ -150,8 +149,8 @@ class PermissionBase {
         return this.checkViaTeamMembership(projectId, 'DEPLOYMENT', permission, membershipData);
     }
 
-     private hasRolePermission(role:RoleTypeGenericType,scope:ScopeType,permission:PermissionType[]){
-        const config = RBAC_CONFIG[scope][role]
+     private hasRolePermission(role:TeamRoleType | ProjectRoleType,scope:ScopeType,permission:PermissionType[]){
+        const config = RBAC_CONFIG[role][scope]
         return permission.every(perm=>config.permissions.includes(perm))
      }
   
@@ -268,7 +267,7 @@ export class Permission{
         return result;
     }
 
-    // TEAM MEMBER OPERATIONS
+
     async canInviteTeamMember(userId: string, teamId: string): Promise<boolean> {
         const result = await this._permissions.canAccess({
             userId,
@@ -277,6 +276,22 @@ export class Permission{
             resourceId: teamId
         });
         if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        return result;
+    }
+
+    async canReadTeamMember(userId:string,teamId:string,targetUserId?:string){
+        let result;
+        if(targetUserId === userId){
+            result = true;
+        }
+        else {
+            result = await this._permissions.canAccess({
+                userId,
+                scope:"TEAM_MEMBER",
+                permission:["READ"],
+                resourceId:teamId
+            })
+        }
         return result;
     }
 
@@ -330,6 +345,22 @@ export class Permission{
             });
         }
         if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        return result;
+    }
+
+    async canReadProjectMember(userId:string,projectId:string,targetUserId?:string){
+        let result;
+        if(targetUserId === userId){
+            result = true;
+        }
+        else {
+            result = await this._permissions.canAccess({
+                userId,
+                scope:"PROJECT_MEMBER",
+                permission:["READ"],
+                resourceId:projectId
+            })
+        }
         return result;
     }
 

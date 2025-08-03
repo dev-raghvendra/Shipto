@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import dbService from "db/dbService";
-import { CreateTeamRequestBodyType, DeleteTeamRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType, TeamMemberInvitationRolesType } from "types/team";
+import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamMemberRequestDBBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType, TeamRoleType } from "types/team";
 import { AcceptMemberInviteRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
@@ -61,7 +61,7 @@ class TeamService {
             }
             const member = await dbService.createTeamMember({
                 userId,
-                role:invite.role as TeamMemberInvitationRolesType,
+                role:invite.role as TeamRoleType,
                 teamId:invite.teamId
             })
     
@@ -70,6 +70,27 @@ class TeamService {
         catch (e) {
           return HandleServiceErrors(e,null,{NOT_FOUND:"Invite not found",BAD_REQUEST:"Invite expired"});
        }
-}}
+    }
+
+    async getTeamMember({authUserData:{userId},targetUserId,teamId}:GetTeamMemberRequestBodyType){
+     try {
+        await this._permissions.canReadTeamMember(userId,teamId,targetUserId);
+        const memeber = await dbService.findUniqueTeamMember({userId_teamId:{userId:targetUserId,teamId}});
+        return AuthResponse.OK(memeber,"Team member found");
+     } catch (e) {
+        return HandleServiceErrors(e,"User");
+     }
+    }
+
+    async deleteTeamMember({authUserData:{userId},targetUserId,teamId}:DeleteTeamMemberRequestBodyType){
+        try {
+            await this._permissions.canRemoveTeamMember(userId,teamId,targetUserId);
+            const res = await dbService.deleteTeamMember({userId_teamId:{teamId,userId:targetUserId}})
+            return AuthResponse.OK(res,"Team memeber deleted");
+        } catch (e) {
+            return HandleServiceErrors(e,"User")
+        }
+    }
+}
 
 export default TeamService

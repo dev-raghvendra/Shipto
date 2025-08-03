@@ -34,31 +34,30 @@ model Team {
 }
 
 model TeamMember {
-  memberId String   @id @default(uuid())
   userId   String
   teamId   String
-  role     RoleType
+  role     TeamRoleType
 
+  @@id([userId,teamId])
   team     Team     @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
   member   User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model ProjectMember {
-  memberId  String @id  @default(uuid())
   userId    String
-  role      RoleType
+  role      ProjectRoleType
   projectId String
   createdAt DateTime? @default(now())
   updatedAt DateTime? @default(now())
   // projectMemberPermissionOverride  ProjectMemberPermissionOverride[]
-
+  @@id([userId,projectId])
   user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
 }
 
 model TeamMemberInvitation {
   inviteId   String      @id @default(uuid())
-  role       RoleType
+  role       TeamRoleType
   teamId     String
   createdAt  DateTime?   @default(now())
   expiresAt  DateTime    @default(dbgenerated("(now() + interval '7 days')"))
@@ -70,7 +69,7 @@ model TeamMemberInvitation {
 
 model ProjectMemberInvitation {
   inviteId    String      @id @default(uuid())
-  role        RoleType
+  role        ProjectRoleType
   projectId   String
   createdAt   DateTime?   @default(now())
   expiresAt   DateTime?    @default(dbgenerated("(now() + interval '7 days')"))
@@ -91,6 +90,7 @@ enum PermissionType {
   UPDATE
   DELETE
   CREATE
+  TRANSFER_OWNERSHIP
   SELF_DELETE
   SELF_UPDATE
 }
@@ -101,11 +101,18 @@ enum ProviderType {
   EMAIL
 }
 
-enum RoleType {
-  OWNER
-  DEVELOPER
-  ADMIN
-  VIEWER
+enum TeamRoleType {
+  TEAM_OWNER
+  TEAM_DEVELOPER
+  TEAM_ADMIN
+  TEAM_VIEWER
+}
+
+enum ProjectRoleType {
+  PROJECT_OWNER
+  PROJECT_DEVELOPER
+  PROJECT_ADMIN
+  PROJECT_VIEWER
 }
 
 enum ScopeType {
@@ -122,7 +129,7 @@ enum ScopeType {
 //   permissionId          String @id @default(uuid())
 //   projectMemberId       String 
 //   projectId     String 
-//   role         RoleType
+//   role         ProjectRoleType
 //   scope        ScopeType
 //   permissions  PermissionType[]
 
@@ -133,7 +140,7 @@ enum ScopeType {
 //   permissionId   String @id @default(uuid())
 //   teamMemberId   String 
 //   teamId         String 
-//   role           RoleType
+//   role           TeamRoleType
 //   scope          ScopeType
 //   permissions    PermissionType[]
 

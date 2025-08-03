@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import dbService from "db/dbService";
-import { ProjectMemberInvitationRequestBodyType, ProjectMemberInvitationRolesType } from "types/project";
+import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType, ProjectRoleType } from "types/project";
 import { AcceptMemberInviteRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
@@ -11,8 +11,7 @@ class ProjectService {
     constructor(){
       this._permissions = new Permission()
     }
-        async createProjectMemberInvitation({authUserData:{userId},projectId,userId:targetUserId,role}:ProjectMemberInvitationRequestBodyType){
-        // cache code
+    async createProjectMemberInvitation({authUserData:{userId},projectId,userId:targetUserId,role}:ProjectMemberInvitationRequestBodyType){
         try {
             await this._permissions.canInviteProjectMember(userId,projectId);
             const invitation = await dbService.createProjectInvitation({projectId,userId:targetUserId,role})
@@ -31,7 +30,7 @@ class ProjectService {
 
             const member = await dbService.createProjectMember({
                 userId,
-                role:invite.role as ProjectMemberInvitationRolesType,
+                role:invite.role as ProjectRoleType,
                 projectId:invite.projectId
             })
     
@@ -40,7 +39,40 @@ class ProjectService {
         catch (e) {
           return HandleServiceErrors(e,null,{NOT_FOUND:"Invite not found",BAD_REQUEST:"Invite expired"});
        }
-}
+    }
+
+    async getProjectMember({targetUserId,projectId,authUserData:{userId}}:GetProjectMemberRequestBodyType){
+      try {
+          await this._permissions.canReadProjectMember(userId,projectId,targetUserId);
+          const member = await dbService.findUniqueProjectMember({userId_projectId:{userId:targetUserId,projectId}});
+          return AuthResponse.OK(member,"Member found");
+      } catch (e) {
+          return HandleServiceErrors(e,"User");
+       }
+    }
+
+    async deleteProjectMember({targetUserId,projectId,authUserData:{userId}}:DeleteProjectMemberRequestBodyType){
+      try {
+          await this._permissions.canRemoveProjectMember(userId,projectId,targetUserId);
+          const member = await dbService.deleteProjectMember({userId_projectId:{
+            userId:targetUserId,
+            projectId
+          }})
+          return AuthResponse.OK(member,"Member removed");
+      } catch (e) {
+          return HandleServiceErrors(e,"User");
+       }
+    }
+
+    async linkTeam({projectId,teamId, authUserData:{userId}}:CreateTeamLinkRequestBodyType){
+      try {
+        await this._permissions.canCreateTeamLink(userId,projectId);
+        const link = await dbService.createTeamLink({data:{projectId,teamId}})
+        return AuthResponse.OK(link,"Linked team");
+      } catch (e) {
+        return HandleServiceErrors(e,"User",{ALREADY_EXISTS:"Team already linked"});
+      }
+    }
 }
 
 export default ProjectService

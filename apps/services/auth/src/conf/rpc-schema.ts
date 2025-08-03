@@ -1,24 +1,14 @@
-import { 
-    CreateTeamRequestSchema, 
-    DeleteProjectRequestSchema, 
-    DeleteTeamMemberRequestSchema, 
-    DeleteTeamRequestSchema, 
-    EmailPassLoginSchema, 
-    GetTeamMemberRequestSchema, 
-    GetTeamRequestSchema, 
-    GetUserRequestSchema, 
-    ProjectMemberInvitationSchema, 
-    RefreshTokenRequestSchema, 
-    SigninRequestSchema, 
-    TeamMemberInvitationSchema, 
-    UserSchema 
-} from "types"
-import { ZodObject, ZodType } from "zod"
+import { ProjectMemberInvitationRequestSchema } from "types/project"
+import { CreateTeamRequestSchema, DeleteTeamMemberRequestSchema, DeleteTeamRequestSchema, GetTeamMemberRequestSchema, GetTeamRequestSchema, TeamMemberInvitationRequestSchema } from "types/team"
+import { EmailPassLoginRequestSchema, SigninRequestSchema, GetUserRequestSchema, RefreshTokenRequestSchema } from "types/user"
+import { AcceptMemberInviteRequestSchema, BodyLessRequestsSchema } from "types/utility"
+import { ZodObject, ZodType,z } from "zod"
 
 export type RPCs = 
     | "Login"
     | "Signin"
     | "OAuth"
+    | "GetMe"
     | "GetUser"
     | "RefreshToken"
     | "CreateTeam"
@@ -30,8 +20,8 @@ export type RPCs =
     | "CreateProjectMemberInvitation"
     | "GetProjectMember"
     | "DeleteProjectMember"
-    | "DeleteProject"
-
+    | "AcceptTeamInvitation"
+    | "AcceptProjectInvitation"
 
 type RPC_SCHEMA_T = {
     [K in RPCs]: {
@@ -52,19 +42,21 @@ function createRPCEntry<T extends ZodType>(schema: T) {
 }
 
 export const RPC_SCHEMA: RPC_SCHEMA_T = {
-    Login: createRPCEntry(EmailPassLoginSchema),
+    Login: createRPCEntry(EmailPassLoginRequestSchema),
     Signin: createRPCEntry(SigninRequestSchema),
     OAuth: createRPCEntry(SigninRequestSchema),
     GetUser: createRPCEntry(GetUserRequestSchema),
+    GetMe:createRPCEntry(BodyLessRequestsSchema),
     RefreshToken: createRPCEntry(RefreshTokenRequestSchema),
     CreateTeam: createRPCEntry(CreateTeamRequestSchema),
     GetTeam: createRPCEntry(GetTeamRequestSchema),
     DeleteTeam: createRPCEntry(DeleteTeamRequestSchema),
-    CreateTeamMemberInvitation: createRPCEntry(TeamMemberInvitationSchema),
+    CreateTeamMemberInvitation: createRPCEntry(TeamMemberInvitationRequestSchema),
     GetTeamMember: createRPCEntry(GetTeamMemberRequestSchema),
     DeleteTeamMember: createRPCEntry(DeleteTeamMemberRequestSchema),
-    CreateProjectMemberInvitation: createRPCEntry(ProjectMemberInvitationSchema),
+    CreateProjectMemberInvitation: createRPCEntry(ProjectMemberInvitationRequestSchema),
     GetProjectMember: createRPCEntry(GetTeamMemberRequestSchema),
     DeleteProjectMember: createRPCEntry(DeleteTeamMemberRequestSchema),
-    DeleteProject: createRPCEntry(DeleteProjectRequestSchema)
+    AcceptTeamInvitation:createRPCEntry(AcceptMemberInviteRequestSchema),
+    AcceptProjectInvitation:createRPCEntry(AcceptMemberInviteRequestSchema)
 } as const

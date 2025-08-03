@@ -1,16 +1,14 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import passHashMiddleware from "./middleware";
-import { v4 as uuid } from "uuid";
 import { SigninRequestBodyType } from "types/user";
 import { CreateTeamRequestDBBodyType, DeleteTeamRequestDBBodyType, TeamMemberInvitationRequestDBBodyType } from "types/team";
 import { ProjectMemberInvitationRequestDBBodyType } from "types/project";
+import { generateId } from "@shipto/services-commons";
 
 
 const MODEL_MAP = {
     User: "user",
     Team: "team",
-    TeamMember: "team-m",
-    ProjectMember: "prj-m",
     TeamMemberInvitation: "team-invite",
     ProjectMemberInvitation: "prj-invite",
 } as const;
@@ -23,11 +21,10 @@ class Database {
         this._client.$use(passHashMiddleware);
     }
 
-    // --- User Methods ---
     createUser(body: SigninRequestBodyType) {
         return this._client.user.create({
             data: {
-                userId: this._generateId("User"),
+                userId: generateId("User",MODEL_MAP),
                 ...body,
             },
             select: {
@@ -37,34 +34,36 @@ class Database {
     }
 
     findUniqueUser(args: Prisma.UserFindUniqueOrThrowArgs) {
-  return this._client.user.findUniqueOrThrow(args);
-}
-
-    findUniqueUserById(userId: string, select?: Prisma.UserSelect) {
-        return this._client.user.findUniqueOrThrow({ where: { userId }, select });
+     return this._client.user.findUniqueOrThrow(args);
     }
 
     findUsers(where: Prisma.UserWhereInput, select: Prisma.UserSelect) {
         return this._client.user.findMany({ where, select });
     }
 
-    // --- Team Methods ---
+    findUniqueUserById(userId: string, select?: Prisma.UserSelect) {
+        return this._client.user.findUniqueOrThrow({ where: { userId }, select });
+    }
+
     createTeam(body: CreateTeamRequestDBBodyType & { userId: string }) {
         return this._client.team.create({
             data: {
-                teamId: this._generateId("Team"),
+                teamId: generateId("Team",MODEL_MAP),
                 ...body,
                 teamMembers: {
                     create: [
                         {
-                            memberId: this._generateId("TeamMember"),
-                            role: "ADMIN",
+                            role: "TEAM_ADMIN",
                             userId: body.userId,
                         },
                     ],
                 },
             },
         });
+    }
+    
+    findUniqueTeamById(teamId: string, select?: Prisma.TeamSelect) {
+        return this._client.team.findUniqueOrThrow({ where: { teamId }, select });
     }
 
     deleteTeamById({teamId}: DeleteTeamRequestDBBodyType) {
@@ -75,43 +74,50 @@ class Database {
         });
     }
 
-    findUniqueTeamById(teamId: string, select?: Prisma.TeamSelect) {
-        return this._client.team.findUniqueOrThrow({ where: { teamId }, select });
-    }
-
-    // --- Team Member Methods ---
     createTeamMember(body: TeamMemberInvitationRequestDBBodyType) {
         return this._client.teamMember.create({
             data: {
-                memberId: this._generateId("TeamMember"),
                 ...body,
             },
         });
     }
 
-    findTeamMember(where: Prisma.TeamMemberWhereInput, select?: Prisma.TeamMemberSelect) {
-        return this._client.teamMember.findFirstOrThrow({ where, select });
+    findUniqueTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect) {
+        return this._client.teamMember.findUniqueOrThrow({ where, select });
     }
 
-    // --- Project Member Methods ---
+    findTeamMembers(where: Prisma.TeamMemberWhereInput, select?: Prisma.TeamMemberSelect){
+        return this._client.teamMember.findMany({where,select})
+    }
+    
+    deleteTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect){
+        return this._client.teamMember.delete({where,select})
+    }
+
     createProjectMember(body: ProjectMemberInvitationRequestDBBodyType) {
         return this._client.projectMember.create({
             data: {
-                memberId: this._generateId("ProjectMember"),
                 ...body,
             },
         });
     }
 
-    findProjectMember(where: Prisma.ProjectMemberWhereInput, select?: Prisma.ProjectMemberSelect) {
-        return this._client.projectMember.findFirstOrThrow({ where, select });
+    findUniqueProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect) {
+        return this._client.projectMember.findUniqueOrThrow({ where, select });
     }
 
-    // --- Team Invitation Methods ---
+    findProjectMembers(where: Prisma.ProjectMemberWhereInput, select?: Prisma.ProjectMemberSelect){
+        return this._client.projectMember.findMany({where,select})
+    }
+    
+    deleteProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect){
+        return this._client.projectMember.delete({where,select})
+    }
+
     createTeamInvitation(body: TeamMemberInvitationRequestDBBodyType) {
         return this._client.teamMemberInvitation.create({
             data: {
-                inviteId: this._generateId("TeamMemberInvitation"),
+                inviteId: generateId("TeamMemberInvitation",MODEL_MAP),
                 ...body
             },
         });
@@ -121,11 +127,10 @@ class Database {
         return this._client.teamMemberInvitation.findUniqueOrThrow({ where: { inviteId } });
     }
 
-    // --- Project Invitation Methods ---
     createProjectInvitation(body: ProjectMemberInvitationRequestDBBodyType) {
         return this._client.projectMemberInvitation.create({
             data: {
-                inviteId: this._generateId("ProjectMemberInvitation"),
+                inviteId: generateId("ProjectMemberInvitation",MODEL_MAP),
                 ...body
             },
         });
@@ -135,13 +140,12 @@ class Database {
         return this._client.projectMemberInvitation.findUniqueOrThrow({ where: { inviteId } });
     }
 
-    findTeamlinks(args:Prisma.TeamLinkFindManyArgs){
+    findTeamLinks(args:Prisma.TeamLinkFindManyArgs){
         return this._client.teamLink.findMany(args)
     }
 
-    // --- Utility ---
-    private _generateId(model: keyof typeof MODEL_MAP) {
-        return `${MODEL_MAP[model]}-${uuid()}`;
+    createTeamLink(args:Prisma.TeamLinkCreateArgs){
+        return this._client.teamLink.create(args)
     }
 }
 

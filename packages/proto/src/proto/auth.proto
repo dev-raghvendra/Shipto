@@ -1,39 +1,20 @@
 syntax = "proto3";
 
+// User-related messages
 message User {
   string userId = 1;
   string fullName = 2;
   string email = 3;
   string avatarUri = 4;
-  bool emailVerified = 5;
+  bool   emailVerified = 5;
   string createdAt = 6;
   string updatedAt = 7;
   string provider = 8;
 }
 
-message LoginRequest {
-  string email = 1;
-  string password = 2;
-}
-
-message Tokens {
-  string refreshToken = 1;
-  string accessToken = 2;
-}
-
-
-message LoginResponse {
-  int32 code = 1;
-  string message = 2;
-  Tokens res = 3;
-}
-
-message SigninRequest {
-  string fullName = 1;
-  string email = 2;
-  string password = 3;
-  string avatarUri = 4;
-  string provider = 6;
+message GetUserRequest {
+  User authUserData = 1;
+  string targetUserId = 2;
 }
 
 message GetUserResponseData {
@@ -50,10 +31,33 @@ message GetUserResponse {
   GetUserResponseData res = 3;
 }
 
-
-message GetUserRequest {
+message BodyLessRequests {
   User authUserData = 1;
-  string targetUserId = 2;
+}
+
+// Auth-related messages
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SigninRequest {
+  string fullName = 1;
+  string email = 2;
+  string password = 3;
+  string avatarUri = 4;
+  string provider = 6;
+}
+
+message Tokens {
+  string refreshToken = 1;
+  string accessToken = 2;
+}
+
+message LoginResponse {
+  int32 code = 1;
+  string message = 2;
+  Tokens res = 3;
 }
 
 message RefreshTokenRequest {
@@ -61,12 +65,7 @@ message RefreshTokenRequest {
   string refreshToken = 2;
 }
 
-message CreateTeamRequest {
-  User authUserData = 1;
-  string teamName = 2;
-  string description = 3;
-}
-
+// Team-related messages
 message Team {
   string teamId = 1;
   string teamName = 2;
@@ -76,7 +75,13 @@ message Team {
   string updatedAt = 6;
 }
 
-message GetTeamResponse {
+message CreateTeamRequest {
+  User authUserData = 1;
+  string teamName = 2;
+  string description = 3;
+}
+
+message CreateTeamResponse {
   int32 code = 1;
   string message = 2;
   Team res = 3;
@@ -87,26 +92,24 @@ message GetTeamRequest {
   string teamId = 2;
 }
 
-message DeleteTeamRequest {
-  User authUserData = 1;
-  string teamId = 2;
-}
-
-message DeleteTeamResponseData {
-  string message = 1;
-}
-
-message DeleteTeamResponse {
-  int32 code = 1;
-  string message = 2;
-  DeleteTeamResponseData res = 3;
-}
-message CreateTeamResponse {
+message GetTeamResponse {
   int32 code = 1;
   string message = 2;
   Team res = 3;
 }
 
+message DeleteTeamRequest {
+  User authUserData = 1;
+  string teamId = 2;
+}
+
+message DeleteTeamResponse {
+  int32 code = 1;
+  string message = 2;
+  Team res = 3;
+}
+
+// Team member invitation messages
 message CreateTeamMemberInvitationRequest {
   User authUserData = 1;
   string targetUserId = 2;
@@ -121,12 +124,25 @@ message CreateTeamMemberInvitationResponseData {
   string status = 4;
   string createdAt = 5;
   string updatedAt = 6;
+  string expiresAt = 7;
 }
 
 message CreateTeamMemberInvitationResponse {
   int32 code = 1;
   string message = 2;
   CreateTeamMemberInvitationResponseData res = 3;
+}
+
+message AcceptInvitationRequest {
+   User authUserData = 1;
+   string inviteId = 2;
+}
+
+// Team member messages
+message GetTeamMemberRequest {
+  string targetUserId = 1;
+  string teamId = 2;
+  User   authUserData = 3;
 }
 
 message GetTeamMemberResponseData {
@@ -142,39 +158,25 @@ message GetTeamMemberResponse {
   GetTeamMemberResponseData res = 3;
 }
 
-message GetProjectMemberResponseData {
-  string memberId = 1;
-  string userId = 2;
-  string projectId = 3;
-  string role = 4;
+message DeleteTeamMemberRequest {
+  User authUserData = 1;
+  string targetUserId = 2;
+  string teamId = 3;
 }
 
-message GetProjectMemberResponse {
+message DeleteTeamMemberResponseData {
+   string role = 1;
+   string userId = 2;
+   string teamId = 3;
+}
+
+message DeleteTeamMemberResponse {
   int32 code = 1;
   string message = 2;
-  GetProjectMemberResponseData res = 3;
+  DeleteTeamMemberResponseData res = 3;
 }
 
-message GenericGetMemberRequest {
-  User authUserData = 1;
-  string memberId = 2;
-}
-
-message GenericDeleteMemberRequest {
-  User authUserData = 1;
-  string memberId = 2;
-}
-
-message GenericDeleteMemberResponseData {
-  string message = 1;
-}
-
-message GenericDeleteMemberResponse {
-  int32 code = 1;
-  string message = 2;
-  GenericDeleteMemberResponseData res = 3;
-}
-
+// Project member invitation messages
 message CreateProjectMemberInvitationRequest {
   User authUserData = 1;
   string targetUserId = 2;
@@ -197,32 +199,47 @@ message CreateProjectMemberInvitationResponse {
   CreateProjectMemberInvitationResponseData res = 3;
 }
 
-message DeleteProjectRequest {
-  User authUserData = 1;
+// Project member messages
+message GetProjectMemberRequest {
+  string targetUserId = 1;
   string projectId = 2;
+  User   authUserData = 3;
 }
 
-message DeleteProjectResponseData {
-  string message = 1;
+message GetProjectMemberResponseData {
+  string memberId = 1;
+  string userId = 2;
+  string projectId = 3;
+  string role = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
 }
 
-message DeleteProjectResponse {
+message GetProjectMemberResponse {
   int32 code = 1;
   string message = 2;
-  DeleteProjectResponseData res = 3;
+  GetProjectMemberResponseData res = 3;
 }
 
-message BodyLessRequests {
+message DeleteProjectMemberRequest {
   User authUserData = 1;
+  string targetUserId = 2;
+  string projectId = 3;
 }
 
-message AcceptInvitationRequest {
-   User authUserData = 1;
-   string inviteId = 2;
+message DeleteProjectMemberResponseData {
+   string role = 1;
+   string userId = 2;
+   string projectId = 3;
 }
 
+message DeleteProjectMemberResponse {
+  int32 code = 1;
+  string message = 2;
+  DeleteProjectMemberResponseData res = 3;
+}
 
-
+// AuthService definition
 service AuthService {
   // Authentication
   rpc Login(LoginRequest) returns (LoginResponse);
@@ -239,17 +256,15 @@ service AuthService {
 
   // Team Members
   rpc CreateTeamMemberInvitation(CreateTeamMemberInvitationRequest) returns (CreateTeamMemberInvitationResponse);
-  rpc GetTeamMember(GenericGetMemberRequest) returns (GetTeamMemberResponse);
-  rpc DeleteTeamMember(GenericDeleteMemberRequest) returns (GenericDeleteMemberResponse);
+  rpc GetTeamMember(GetTeamMemberRequest) returns (GetTeamMemberResponse);
+  rpc DeleteTeamMember(DeleteTeamMemberRequest) returns (DeleteProjectMemberResponse);
   rpc AcceptTeamInvitation(AcceptInvitationRequest) returns (GetTeamMemberResponse);
   
   // Project Members
   rpc CreateProjectMemberInvitation(CreateProjectMemberInvitationRequest) returns (CreateProjectMemberInvitationResponse);
-  rpc GetProjectMember(GenericGetMemberRequest) returns (GetProjectMemberResponse);
-  rpc DeleteProjectMember(GenericDeleteMemberRequest) returns (GenericDeleteMemberResponse);
+  rpc GetProjectMember(GetProjectMemberRequest) returns (GetProjectMemberResponse);
+  rpc DeleteProjectMember(DeleteProjectMemberRequest) returns (DeleteProjectMemberResponse);
   rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);
-
-  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
 
   // Future: partial decentralized RBAC
   // rpc UpdateTeamMember(UpdateTeamMemberRequest) returns (UpdateTeamMemberResponse);

@@ -235,6 +235,9 @@ importers:
       '@grpc/grpc-js':
         specifier: ^1.13.4
         version: 1.13.4
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^4.0.5
         version: 4.0.5
