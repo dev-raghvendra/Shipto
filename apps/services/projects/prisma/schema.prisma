@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectType {
+  STATIC
+  DYNAMIC
+}
+
+model Project {
+  projectId   String    @id @default(uuid())
+  name        String
+  framework   String?         
+  projectType ProjectType
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  repositories          Repository
+  deployments           Deployment[]
+  environmentVariables  EnvironmentVariable[]
+}
+
+model Framework {
+  frameworkId     String   @id @default(uuid())
+  icon            String
+  name            String   @unique
+  displayName     String   @unique
+  defaultBuildCmd String
+  defaultProdCmd  String?  @default(null)
+  runtime         Runtime  
+
+
+  repositoriy    Repository[]
+}
+
+model Repository {
+  repositoryId      String    @id @default(uuid())
+  repoURI           String    @unique
+  projectId         String
+  branch            String?   @default("main")
+  frameworkId       String   
+  buildCommand      String
+  productionCommand String?   @default(null) 
+
+  project           Project   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  framework         Framework @relation(fields: [frameworkId], references: [frameworkId], onDelete: Cascade)
+  deployments       Deployment[]
+}
+
+model Deployment {
+  deploymentId    String           @id @default(uuid())
+  commitHash      String
+  status          DeploymentStatus? @default("QUED")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  commitMessage   String
+  author          String
+  projectId       String
+  repositoryId    String
+
+  project         Project          @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+  repository      Repository       @relation(fields: [repositoryId], references: [repositoryId], onDelete: SetNull)
+}
+
+model EnvironmentVariable {
+  projectId  String
+  envName    String
+  envValue   String
+
+  project    Project @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+
+  @@id([projectId, envName])
+}
+
+enum DeploymentStatus {
+  QUED
+  INACTIVE
+  PRODUCTION
+  PROVISIONING
+}
+
+enum Runtime {
+  NODEJS
+  PYTHON
+  PHP
+}

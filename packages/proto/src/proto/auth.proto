@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package shipto.auth;
+
 // User-related messages
 message User {
   string userId = 1;

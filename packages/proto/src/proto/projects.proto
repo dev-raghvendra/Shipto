@@ -1,0 +1,174 @@
+syntax="proto3";
+package shipto.project; 
+
+import "auth.proto";
+
+enum ProjectType {
+    UNSPECIFIED_TYPE = 0;
+    STATIC = 1;
+    DYNAMIC = 2;
+}
+
+enum Runtime {
+    UNSPECIFIED_RUNTIME = 0;
+    NODEJS = 1;
+    PYTHON = 2;
+    PHP = 3;
+}
+
+message Framework {
+    string frameworkId = 1;
+    string icon = 2;
+    string displayName = 3; 
+    string defaultBuildCommand = 4;
+    string defaultProductionCommand = 5;
+    Runtime runtime = 6;
+}
+
+message Repository {
+    string repositoryId = 1;
+    string repoURI = 2;
+    string projectId = 3;
+    string branch = 4;
+    Framework framework = 5;
+    string buildCommand = 6;
+    string productionCommand = 7;
+}
+
+message Project {
+   string projectId = 1;
+   string name = 2;
+   ProjectType projectType = 4;
+   string createdAt = 5;
+   string updatedAt = 6; 
+   Repository repository = 7;
+   repeated EnviornmentVariables envs = 8;
+}
+
+message EnviornmentVariables {
+    string projectId = 1;
+    string envName = 2;
+    string envValue = 3;
+}
+
+message EnviornmentVariablesKeyValue {
+    string envName = 1;
+    string envValue = 2;
+}
+
+
+message CreateProjectRequest {
+    string name = 1;
+    string framework = 2;
+    ProjectType projectType = 3;
+    string  repositoryURI = 4;
+    string frameworkId = 5;
+    string buildCommand = 6;
+    string productionCommand = 7;
+    string branch = 8 ;
+    repeated EnviornmentVariablesKeyValue envs = 9;
+}
+
+message UpdateProjectRequest {
+    string name = 1;
+    User authUserData= 2;
+}
+
+message DeleteProjectRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+
+message ProjectResponse {
+    int32 code = 1;
+    string message = 2;
+    Project res = 3;
+}
+
+
+message RedeployRequest {
+     User authUserData = 1;
+     string deploymentId = 2;
+     string projectId = 3;
+}
+
+message DeleteDeploymentRequest {
+     User authUserData= 1;
+     string deploymentId = 2;
+     string projectId = 3;
+}
+
+message GetProjectRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+message GetDeploymentRequest {
+    User authUserData = 1;
+    string projectId = 2;
+    string deploymentId = 3;
+}
+
+message GetAllDeploymentsResponse {
+    int32 code =1;
+    string message = 2;
+    repeated Deployment res= 3;
+}
+
+message Deployment {
+    string deploymentId = 1;
+    string commitHash = 2;
+    string status = 3;
+    string commitMessage = 4;
+    string author = 5;
+    string projectId = 6;
+    string repositoryId = 7;
+}
+
+message AllProjectsResponse{
+    int32 code = 1;
+    string message = 2;
+    repeated Project  res = 3;
+}
+
+
+message GetAllDeploymentsRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+message DeploymentResponse {
+    int32 code = 1;
+    string message = 2;
+    Deployment res = 3;
+}
+
+message AllDeploymentResponse {
+    int32 code = 1;
+    string message = 2;
+    Deployment res = 3;
+}
+
+service ProjectsService {
+     rpc CreateProject (CreateProjectRequest)   returns (ProjectResponse);
+     rpc GetProject    (GetProjectRequest)      returns (ProjectResponse);
+     rpc GetAllProjects (BodyLessRequest)       returns (AllProjectsResponse);
+     rpc UpdateProject (UpdateProjectRequest)   returns (ProjectResponse);
+     rpc DeleteProject (DeleteProjectRequest)   returns (ProjectResponse);
+     
+     rpc GetDeployment    (GetDeploymentRequest)    returns     (DeploymentResponse);
+     rpc GetAllDeployments (GetAllDeploymentsRequest) returns      (AllDeploymentsResponse);
+    //  rpc CreateDeployment (CreateDeploymentRequest) returns     (DeploymentResponse);
+     rpc DeleteDeployment (DeleteDeploymentRequest) returns     (DeploymentResponse);
+     rpc RedeployRequest  (RedeployRequest)         returns     (DeploymentResponse);
+
+    //  rpc CreateEnvVars (CreateEnvVarsRequest)       returns (EnvVarsResponse);
+    //  rpc DeleteEnvVars (DeleteEnvVarsRequest)       returns (EnvVarsResponse);
+    //  rpc UpdateEnvVars (UpdateEnvVarsRequest)       returns (EnvVarsResponse);
+     
+    //  rpc GetRepository    (GetRepositoryRequest)    returns (RepositoryResponse);
+    //  rpc CreateRepository (CreateRepositoryRequest) returns (RepositoryResponse);
+    //  rpc UpdateRepository (UpdateRepositoryRequest) returns (RepositoryResponse);
+    //  rpc DeleteRepository (DeleteRepositoryRequest) returns (RepositoryResponse);
+}

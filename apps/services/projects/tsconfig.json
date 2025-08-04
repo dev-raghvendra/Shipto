@@ -1,0 +1,12 @@
+{
+  "extends":"@shipto/typescript-config/service.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "baseUrl": "./src",
+    "paths": {
+      "@prisma/*":["../prisma/generated/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules","dist"]
+}
