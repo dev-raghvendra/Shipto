@@ -1,6 +1,6 @@
 import { ProjectMemberInvitationRequestSchema } from "types/project"
 import { CreateTeamRequestSchema, DeleteTeamMemberRequestSchema, DeleteTeamRequestSchema, GetTeamMemberRequestSchema, GetTeamRequestSchema, TeamMemberInvitationRequestSchema } from "types/team"
-import { EmailPassLoginRequestSchema, SigninRequestSchema, GetUserRequestSchema, RefreshTokenRequestSchema } from "types/user"
+import { EmailPassLoginRequestSchema, SigninRequestSchema, GetUserRequestSchema, OAuthRequestSchema } from "types/user"
 import { AcceptMemberInviteRequestSchema, BodyLessRequestsSchema, HasPermissionsRequestSchema } from "types/utility"
 import { ZodObject, ZodType,z } from "zod"
 
@@ -45,10 +45,10 @@ function createRPCEntry<T extends ZodType>(schema: T) {
 export const RPC_SCHEMA: RPC_SCHEMA_T = {
     Login: createRPCEntry(EmailPassLoginRequestSchema),
     Signin: createRPCEntry(SigninRequestSchema),
-    OAuth: createRPCEntry(SigninRequestSchema),
+    OAuth: createRPCEntry(OAuthRequestSchema),
     GetUser: createRPCEntry(GetUserRequestSchema),
     GetMe:createRPCEntry(BodyLessRequestsSchema),
-    RefreshToken: createRPCEntry(RefreshTokenRequestSchema),
+    RefreshToken: createRPCEntry(BodyLessRequestsSchema),
     CreateTeam: createRPCEntry(CreateTeamRequestSchema),
     GetTeam: createRPCEntry(GetTeamRequestSchema),
     DeleteTeam: createRPCEntry(DeleteTeamRequestSchema),

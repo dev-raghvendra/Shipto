@@ -4,10 +4,9 @@ import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import AuthResponse from "utils/response";
 import { compare } from "libs/bcrypt";
 import { HandleServiceErrors } from "utils/service-error";
-import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType } from "types/user";
-import { HasPermissionsRequestBodyType } from "types/utility";
+import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
+import { BodyLessRequest, HasPermissionsRequestBodyType } from "types/utility";
 import { PermissionBase } from "utils/rbac-utils";
-import { convertDatesToISO } from "@shipto/services-commons";
 
 class AuthService {
 
@@ -28,10 +27,10 @@ class AuthService {
 
     async signIn(body: SigninRequestBodyType) {
         try {
-            const u = await dbService.createUser(body);
+            const u = await dbService.createEmailUser(body);
             return this.createSession(u);
-        } catch (e) {
-            return HandleServiceErrors(e,null,{ALREADY_EXISTS:"User already exists with provided email"});
+        } catch (e : any) {
+            return HandleServiceErrors({details:e,RPC:"SIGNIN"},null,{ALREADY_EXISTS:"User already exists with provided email"});
         }
     }
 
@@ -45,13 +44,13 @@ class AuthService {
             const {password, ...user} = u;
             return this.createSession(user);
         } catch (e) {
-            return HandleServiceErrors(e,null,{NOT_FOUND:"Invalid credentials"});
+            return HandleServiceErrors({details:e,RPC:"LOGIN"},null,{NOT_FOUND:"Invalid credentials"});
         }
     }
 
-    async OAuth(body:SigninRequestBodyType){
+    async OAuth(body:OAuthRequestBodyType){
         try {
-            const u = await dbService.createUser(body);
+            const u = await dbService.createOAuthUser(body);
             return this.createSession(u);
         } catch (e) {
              if (
@@ -60,7 +59,7 @@ class AuthService {
              ){
                 return this.createSession(body);
              }
-              return AuthResponse.INTERNAL()
+              return AuthResponse.INTERNAL({details:e,RPC:"OAUTH"})
         }
     }
     
@@ -74,10 +73,9 @@ class AuthService {
                 updatedAt:true,
                 email:true
             });
-            convertDatesToISO.apply(u)
             return AuthResponse.OK(u,"User found");
         } catch (e) {
-           return HandleServiceErrors(e,"User");
+           return HandleServiceErrors({details:e,RPC:"GETUSER"},"User");
         }
     }
 
@@ -95,18 +93,17 @@ class AuthService {
                 teamMembers:true,
                 projectMembers:true
             })
-            convertDatesToISO.apply(u)
             return AuthResponse.OK(u,"User found");
         } catch (e) {
-            return HandleServiceErrors(e,"User")
+            return HandleServiceErrors({details:e,RPC:"GETME"},"User")
         }
     }
 
-    async refreshToken(body:RefreshTokenRequestBodyType){
+    async refreshToken(body:BodyLessRequest){
       try {
         return this.createSession(body.authUserData);
       } catch (e) {
-        return AuthResponse.INTERNAL()
+        return AuthResponse.INTERNAL(e)
       }
     }
 
@@ -120,8 +117,8 @@ class AuthService {
             targetUserId
         })
         return AuthResponse.OK(has,"Permission derived");
-     } catch (error) {
-        return HandleServiceErrors(error,"User")
+     } catch (e) {
+        return HandleServiceErrors({details:e,RPC:"HASPERMISSIONS"},"User")
      }
     }
 }

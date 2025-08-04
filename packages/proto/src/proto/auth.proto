@@ -66,7 +66,14 @@ message SigninRequest {
   string email = 2;
   string password = 3;
   string avatarUri = 4;
-  string provider = 6;
+}
+
+message OAuthRequest {
+  string fullName = 1;
+  string email = 2;
+  string password = 3;
+  string avatarUri = 4;
+  string provider = 5;
 }
 
 message Tokens {
@@ -80,10 +87,6 @@ message LoginResponse {
   Tokens res = 3;
 }
 
-message RefreshTokenRequest {
-  User user = 1;
-  string refreshToken = 2;
-}
 
 // Team-related messages
 message Team {
@@ -132,9 +135,8 @@ message DeleteTeamResponse {
 // Team member invitation messages
 message CreateTeamMemberInvitationRequest {
   User authUserData = 1;
-  string targetUserId = 2;
-  string teamId = 3;
-  string role = 4;
+  string teamId = 2;
+  string role = 3;
 }
 
 message CreateTeamMemberInvitationResponseData {
@@ -166,10 +168,9 @@ message GetTeamMemberRequest {
 }
 
 message GetTeamMemberResponseData {
-  string memberId = 1;
-  string userId = 2;
-  string teamId = 3;
-  string role = 4;
+  string userId = 1;
+  string teamId = 2;
+  string role = 3;
 }
 
 message GetTeamMemberResponse {
@@ -277,10 +278,10 @@ service AuthService {
   // Authentication
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Signin(SigninRequest) returns (LoginResponse);
-  rpc OAuth(SigninRequest) returns (LoginResponse);
+  rpc OAuth(OAuthRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetMe(BodyLessRequests) returns (GetCurrentUserResponse);
-  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
+  rpc RefreshToken(BodyLessRequests) returns (LoginResponse);
 
   // Team Management
   rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);

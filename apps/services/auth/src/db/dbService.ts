@@ -1,8 +1,8 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import passHashMiddleware from "./middleware";
-import { SigninRequestBodyType } from "types/user";
-import { CreateTeamRequestDBBodyType, DeleteTeamRequestDBBodyType, TeamMemberInvitationRequestDBBodyType } from "types/team";
-import { ProjectMemberInvitationRequestDBBodyType } from "types/project";
+import { OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
+import { CreateTeamRequestDBBodyType, DeleteTeamRequestDBBodyType, TeamMemberDBBodyType, TeamMemberInvitationRequestDBBodyType } from "types/team";
+import { ProjectMemberDBBodyType, ProjectMemberInvitationRequestDBBodyType } from "types/project";
 import { generateId } from "@shipto/services-commons";
 
 
@@ -21,11 +21,32 @@ class Database {
         this._client.$use(passHashMiddleware);
     }
 
-    createUser(body: SigninRequestBodyType) {
+    createOAuthUser(body:OAuthRequestBodyType) {
+        return this._client.user.create({
+            data: {
+                userId: generateId("User",MODEL_MAP),
+                emailVerified:true,
+                ...body,
+            },
+            select: {
+                userId:true,
+               avatarUri:true,
+               fullName:true,
+               email:true,
+               emailVerified:true,
+               createdAt:true,
+               provider:true,
+               updatedAt:true
+            },
+        });
+    }
+
+    createEmailUser(body:SigninRequestBodyType){
         return this._client.user.create({
             data: {
                 userId: generateId("User",MODEL_MAP),
                 ...body,
+                provider:"EMAIL"
             },
             select: {
                 userId:true,
@@ -56,7 +77,8 @@ class Database {
         return this._client.team.create({
             data: {
                 teamId: generateId("Team",MODEL_MAP),
-                ...body,
+                teamName:body.teamName,
+                description:body.description,
                 teamMembers: {
                     create: [
                         {
@@ -81,14 +103,14 @@ class Database {
         });
     }
 
-    createTeamMember(body: TeamMemberInvitationRequestDBBodyType) {
+    createTeamMember(body: TeamMemberDBBodyType) {
         return this._client.teamMember.create({
             data: {
                 ...body,
             },
         });
     }
-
+    
     findUniqueTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect) {
         return this._client.teamMember.findUniqueOrThrow({ where, select });
     }
@@ -101,7 +123,7 @@ class Database {
         return this._client.teamMember.delete({where,select})
     }
 
-    createProjectMember(body: ProjectMemberInvitationRequestDBBodyType) {
+    createProjectMember(body: ProjectMemberDBBodyType) {
         return this._client.projectMember.create({
             data: {
                 ...body,

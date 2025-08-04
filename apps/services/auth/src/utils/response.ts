@@ -1,14 +1,18 @@
 import { status } from "@grpc/grpc-js";
+import { convertDatesToISO } from "@shipto/services-commons";
+import logger from "@shipto/services-commons/libs/winston";
 
 class AuthServiceResponse {
      OK<t>(r:t,message:string){
+        convertDatesToISO.apply(r as Object)
         return {
             code:status.OK,
             res:r,
             message
         }
      }
-     INTERNAL(){
+     INTERNAL(e?:any){
+        logger.error(`ERROR_IN_AUTH_SERVICE_${e.details} ${JSON.stringify(e,null,4)}`)
         return {
             code:status.INTERNAL,
             res:null,

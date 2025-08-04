@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
-import {BodyLessRequests, GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, RefreshTokenRequest, SigninRequest, Tokens} from "@shipto/proto";
-import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, RefreshTokenRequestBodyType, SigninRequestBodyType, UserBody } from "types/user";
-import { HasPermissionsRequestBodyType } from "types/utility";
+import {GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, SigninRequest, BodyLessRequests, Tokens} from "@shipto/proto";
+import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
+import { HasPermissionsRequestBodyType, BodyLessRequest } from "types/utility";
 
 class AuthHandlers {
     private _authService;
@@ -45,7 +45,7 @@ class AuthHandlers {
         }
     } 
 
-    async handleOAuth(call:ServerUnaryCall<SigninRequest & {body:SigninRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){
+    async handleOAuth(call:ServerUnaryCall<SigninRequest & {body:OAuthRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){
         try {
             const {code,message,res} = await this._authService.OAuth(call.request.body);
             if(code!==status.OK) return callback({code,message})
@@ -75,7 +75,7 @@ class AuthHandlers {
         }
     }
 
-    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequests},GetCurrentUserResponse>,callback:sendUnaryData<GetCurrentUserResponse>){
+    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetCurrentUserResponse>,callback:sendUnaryData<GetCurrentUserResponse>){
        try {
           const {code,res,message} = await this._authService.GetMe(call.request.authUserData.userId)
           if(code!==status.OK) return callback({code,message});
@@ -91,7 +91,7 @@ class AuthHandlers {
 
     }
 
-    async handleRefreshToken(call:ServerUnaryCall<RefreshTokenRequest & {body:RefreshTokenRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){
+    async handleRefreshToken(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},LoginResponse>,callback:sendUnaryData<LoginResponse>){
         try {
             const {res,code,message} = await this._authService.refreshToken(call.request.body);
             if(code!==status.OK) return callback({code,message});

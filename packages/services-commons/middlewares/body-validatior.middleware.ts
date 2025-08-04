@@ -1,5 +1,6 @@
 import { ZodTypeAny, parseAsync } from "zod";
 import { ServerUnaryCall, sendUnaryData, status } from "@grpc/grpc-js";
+import logger from "../libs/winston";
 
 // Protobuf-compatible message type check
 interface ProtobufMessage {
@@ -57,14 +58,13 @@ export function createValidator<Map extends SchemaMap>(schemaMap: Map) {
       try {
         const raw = extractRequestData(call.request);
         const schema = schemaMap[method].schema;
-        console.log("RAW BODY:",raw);
         const parsed = await parseAsync(schema, raw);
 
         const callWithBody = call as unknown as ValidatedCall<Map, K, TReq, TRes>;
         (callWithBody.request as any).body = parsed;
         handler(callWithBody, callback);
       } catch(e){
-        console.log("ERROR:",e)
+        logger.info(`ERROR_OCCURED_IN_BODY_VALIDATION ${JSON.stringify(e,null,4)}`)
         callback({
           code: status.INVALID_ARGUMENT,
           message: schemaMap[method].errMsg || "Invalid argument",

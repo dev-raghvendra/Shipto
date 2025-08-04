@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import dbService from "db/dbService";
-import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType, ProjectRoleType } from "types/project";
+import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
 import { AcceptMemberInviteRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
@@ -17,27 +17,27 @@ class ProjectService {
             const invitation = await dbService.createProjectInvitation({projectId,userId:targetUserId,role})
            return AuthResponse.OK(invitation,"Invitation created")
         } catch (e:any) {
-         return HandleServiceErrors(e,null,{PERMISSION_DENIED:"User is not  the owner of project"})
+         return HandleServiceErrors({details:e,RPC:"CREATE-PROJECT-MEMBER-INVITATION"},null,{PERMISSION_DENIED:"User is not  the owner of project"})
        }
     }
 
     async acceptInvitation({inviteId,authUserData:{userId}}:AcceptMemberInviteRequestBodyType){
        try {
-            const invite = await dbService.findProjectInviteById(inviteId);
-            if(invite.expiresAt?.getMilliseconds() as number >= Date.now()){
+            const {expiresAt,role,projectId} = await dbService.findProjectInviteById(inviteId);
+            if(expiresAt?.getMilliseconds() as number >= Date.now()){
                 throw new PrismaClientKnownRequestError("BAD_REQUEST",{code:"400",clientVersion:""})
             }
 
             const member = await dbService.createProjectMember({
                 userId,
-                role:invite.role as ProjectRoleType,
-                projectId:invite.projectId
+                role,
+                projectId
             })
     
         return AuthResponse.OK(member,"Project joined");
        }  
         catch (e) {
-          return HandleServiceErrors(e,null,{NOT_FOUND:"Invite not found",BAD_REQUEST:"Invite expired"});
+          return HandleServiceErrors({details:e,RPC:"ACCEPT-PROJECT-MEMBER-INVITATION"},null,{NOT_FOUND:"Invite not found",BAD_REQUEST:"Invite expired"});
        }
     }
 
@@ -47,7 +47,7 @@ class ProjectService {
           const member = await dbService.findUniqueProjectMember({userId_projectId:{userId:targetUserId,projectId}});
           return AuthResponse.OK(member,"Member found");
       } catch (e) {
-          return HandleServiceErrors(e,"User");
+          return HandleServiceErrors({details:e,RPC:"GET-PROJECT-MEMBER-INVITATION"},"User");
        }
     }
 
@@ -60,7 +60,7 @@ class ProjectService {
           }})
           return AuthResponse.OK(member,"Member removed");
       } catch (e) {
-          return HandleServiceErrors(e,"User");
+          return HandleServiceErrors({details:e,RPC:"DELETE-PROJECT-MEMBER-INVITATION"},"User");
        }
     }
 
@@ -70,7 +70,7 @@ class ProjectService {
         const link = await dbService.createTeamLink({data:{projectId,teamId}})
         return AuthResponse.OK(link,"Linked team");
       } catch (e) {
-        return HandleServiceErrors(e,"User",{ALREADY_EXISTS:"Team already linked"});
+        return HandleServiceErrors({details:e,RPC:"LINK-TEAM"},"User",{ALREADY_EXISTS:"Team already linked"});
       }
     }
 }

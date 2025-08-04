@@ -5,9 +5,11 @@ export function generateId<t,k extends keyof t>(model:k,map:t) {
 }
 
 export function convertDatesToISO(this:Record<string,any>){
-    for (const key in this ){
+   if(typeof this == "object"){
+     for (const key in this ){
         if(this[key] instanceof Date){
             this[key] = this[key].toISOString() 
         }
     }
+   }
 }

@@ -20,19 +20,19 @@ export type OverrideMap = {
 };
 
 export function HandleServiceErrors(
-    err: unknown,
+    err: any,
     resourceName: string | null,
     overrides?: OverrideMap
 ) {
     const name = resourceName || "Resource";
 
-    if (err instanceof PrismaClientKnownRequestError) {
-        const code = err.code as keyof typeof PrismaErrorCodeReverse;
+    if (err.details instanceof PrismaClientKnownRequestError) {
+        const code = err.details.code as keyof typeof PrismaErrorCodeReverse;
         const key  = PrismaErrorCodeReverse[code];
-
+        
         // If code is not in our reverse map, treat it as unhandled
         if (!key) {
-            return AuthResponse.INTERNAL();
+            return AuthResponse.INTERNAL(err);
         }
 
         const msg = overrides?.[key];
@@ -59,9 +59,9 @@ export function HandleServiceErrors(
                     msg || `${name} is not authenticated.`
                 );
             default:
-                return AuthResponse.INTERNAL();
+                return AuthResponse.INTERNAL(err);
         }
     }
 
-    return AuthResponse.INTERNAL();
+    return AuthResponse.INTERNAL(err);
 }

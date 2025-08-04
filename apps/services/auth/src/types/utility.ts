@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PermissionType } from '@prisma/index';
+import { PermissionType, TeamRoleType } from '@prisma/index';
 import { UserSchema,Scopes } from './user';
 
 
@@ -9,11 +9,11 @@ export const AcceptMemberInviteRequestSchema = z.object({
   authUserData:UserSchema
 });
 export type AcceptMemberInviteRequestBodyType = z.infer<typeof AcceptMemberInviteRequestSchema>
-export type AcceptMemberInviteRequestDBBodyType = Omit<z.infer<typeof AcceptMemberInviteRequestSchema>,"authUserData">
+
 export const BodyLessRequestsSchema = z.object({
   authUserData:UserSchema
 }).strict();
-export type BodyLessRequests = z.infer<typeof BodyLessRequestsSchema>;
+export type BodyLessRequest = z.infer<typeof BodyLessRequestsSchema>;
 export const HasPermissionsRequestSchema = z.object({
    resourceId : z.string(),
    scope : Scopes,

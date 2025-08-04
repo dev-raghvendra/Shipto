@@ -5,6 +5,8 @@ import {createValidator} from "@shipto/services-commons"
 import { RPC_SCHEMA } from "conf/rpc-schema";
 import TeamHandlers from "handlers/team.handler";
 import ProjectHandlers from "handlers/project.handlers";
+import logger from "@shipto/services-commons/libs/winston";
+import SECRETS from "conf/secrets";
 
 const validateRPCBody = createValidator(RPC_SCHEMA);
 const server = new Server();
@@ -35,11 +37,11 @@ server.addService(UnimplementedAuthServiceService.definition, {
     DeleteProjectMember: validateRPCBody("DeleteProjectMember", projectHandlers.handleDeleteProjectMember.bind(projectHandlers)),
 });
 
-server.bindAsync("localhost:50051",ServerCredentials.createInsecure(),(err)=>{
+server.bindAsync(`${SECRETS.HOST}:${SECRETS.PORT}`,ServerCredentials.createInsecure(),(err)=>{
     if (err) {
-        console.error("Failed to bind gRPC server:", err);
+        logger.error(`ERROR_STARTING_AUTH_GRPC_SERVER: ${JSON.stringify(err,null,4)}`)
         process.exit(1);
-      }
-      console.log(`gRPC server listening on ${"localhost"} (port ${50051})`);
+    }
+      logger.info(`AUTH_GRPC_SERVER_LISTENING_ON ${SECRETS.HOST}:${SECRETS.PORT}`)
 })
 

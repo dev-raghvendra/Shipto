@@ -1,5 +1,6 @@
 import z from "zod";
 import { UserBody, UserSchema } from "./user";
+import { AcceptMemberInviteRequestSchema } from "./utility";
 
 export const TeamSchema = z.object({
   teamName: z.string(),
@@ -13,9 +14,8 @@ export const TeamRoles = z.enum(['TEAM_DEVELOPER','TEAM_ADMIN', 'TEAM_OWNER', 'T
 export type TeamRoleType = z.infer<typeof TeamRoles>;
 
 export const TeamMemberInvitationRequestSchema = z.object({
-  userId: z.string(),
   teamId: z.string(),
-  role: TeamRoles,
+  role: TeamRoles.exclude(["TEAM_ADMIN"]),
   authUserData:UserSchema
 }).strict();
 export type TeamMemberInvitationRequestBodyType = z.infer<typeof TeamMemberInvitationRequestSchema>
@@ -58,3 +58,8 @@ export const DeleteTeamMemberRequestSchema = z.object({
 }).strict();
 export type DeleteTeamMemberRequestBodyType = z.infer<typeof DeleteTeamMemberRequestSchema>
 export type DeleteTeamMemberRequestDBBodyType = Omit<DeleteTeamMemberRequestBodyType,"authUserData"> 
+export type TeamMemberDBBodyType = {
+  role:TeamRoleType,
+  userId:string,
+  teamId:string
+}
