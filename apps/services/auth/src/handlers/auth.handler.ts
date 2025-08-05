@@ -25,7 +25,7 @@ class AuthHandlers {
         } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
               })
         }
     }
@@ -40,7 +40,7 @@ class AuthHandlers {
         } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
               })
         }
     } 
@@ -55,7 +55,7 @@ class AuthHandlers {
         } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
               })
         }
     }
@@ -70,7 +70,7 @@ class AuthHandlers {
         } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           })  
         }
     }
@@ -85,7 +85,7 @@ class AuthHandlers {
         } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           })  
         }
 
@@ -101,7 +101,7 @@ class AuthHandlers {
         } catch (e) {
              return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
             })
         }
     }
@@ -115,7 +115,7 @@ class AuthHandlers {
         } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           })  
         }
     }

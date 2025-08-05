@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import dbService from "db/dbService";
 import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
 import { HandleServiceErrors } from "utils/service-error";
@@ -73,6 +73,52 @@ class ProjectService {
         return HandleServiceErrors({details:e,RPC:"LINK-TEAM"},"User",{ALREADY_EXISTS:"Team already linked"});
       }
     }
+
+      async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequest){
+        try {
+            const res = await dbService.startTransaction(async(tx)=>{
+                const teamProjects = await tx.team.findMany({
+                    where:{
+                        teamMembers:{
+                            some:{
+                                userId
+                            }
+                        },
+                        teamLink:{
+                            some:{}
+                        }
+                    },
+                    select:{
+                        teamLink:{
+                            select:{
+                                projectId:true
+                            }
+                        }
+                    }
+                })
+                const allProjectIdsViaTeam = teamProjects.flatMap(tm=>tm.teamLink.map(ln=>ln.projectId));
+                const uniqueProjectIds = [...new Set(allProjectIdsViaTeam)];
+                const directProjects = await tx.projectMember.findMany({
+                    where:{
+                        userId,
+                        projectId:{
+                            notIn:uniqueProjectIds
+                        }
+                    },
+                    select:{
+                        projectId:true
+                    }
+                })
+                const finalIds =  [...uniqueProjectIds,...directProjects.map(p=>p.projectId)];
+                return finalIds
+            }) as string[]
+            if(res.length) return AuthResponse.OK(res,"ProjectIds found");
+            return AuthResponse.NOT_FOUND(null,"User's projectIds not found")
+        } catch (e) {
+            return HandleServiceErrors({e,details:"GET-ALL-USER-PROJECT-IDS"},"Project")          
+        }
+    }
 }
 
 export default ProjectService
+

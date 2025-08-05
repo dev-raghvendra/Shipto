@@ -30,11 +30,13 @@ server.addService(UnimplementedAuthServiceService.definition, {
     AcceptTeamInvitation: validateRPCBody("AcceptTeamInvitation", teamHandlers.handleAcceptTeamInvitation.bind(teamHandlers)),
     GetTeamMember: validateRPCBody("GetTeamMember", teamHandlers.handleGetTeamMember.bind(teamHandlers)),
     DeleteTeamMember: validateRPCBody("DeleteTeamMember", teamHandlers.handleDeleteTeamMember.bind(teamHandlers)),
+    GetAllUserTeams:validateRPCBody("GetAllUserTeams",teamHandlers.handleGetAllUserTeams.bind(teamHandlers)),
 
     CreateProjectMemberInvitation: validateRPCBody("CreateProjectMemberInvitation", projectHandlers.handleCreateProjectMemberInvitation.bind(projectHandlers)),
     AcceptProjectInvitation: validateRPCBody("AcceptProjectInvitation", projectHandlers.handleAcceptInvitation.bind(projectHandlers)),
     GetProjectMember: validateRPCBody("GetProjectMember", projectHandlers.handleGetProjectMember.bind(projectHandlers)),
     DeleteProjectMember: validateRPCBody("DeleteProjectMember", projectHandlers.handleDeleteProjectMember.bind(projectHandlers)),
+    GetAllUserProjectIds:validateRPCBody("GetAllUserProjectIds",projectHandlers.handleGetAllUserProjectIds.bind(projectHandlers))
 });
 
 server.bindAsync(`${SECRETS.HOST}:${SECRETS.PORT}`,ServerCredentials.createInsecure(),(err)=>{

@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { CreateProjectMemberInvitationResponse, CreateProjectMemberInvitationRequest, CreateProjectMemberInvitationResponseData, AcceptInvitationRequest, GetTeamMemberResponse, GetTeamMemberResponseData, GetProjectMemberResponse, GetProjectMemberResponseData, GetProjectMemberRequest, DeleteProjectMemberRequest, DeleteProjectMemberResponse, DeleteProjectMemberResponseData} from "@shipto/proto";
+import { CreateProjectMemberInvitationResponse, CreateProjectMemberInvitationRequest, CreateProjectMemberInvitationResponseData, AcceptInvitationRequest, GetProjectMemberResponse, GetProjectMemberResponseData, GetProjectMemberRequest, DeleteProjectMemberRequest, DeleteProjectMemberResponse, DeleteProjectMemberResponseData, BodyLessRequests, GetAllUserProjectIdsResponse} from "@shipto/proto";
 import ProjectService from "services/project.service";
 import { DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequest as BodyLessRequest } from "types/utility";
 
 class ProjectHandlers {
     private _projectService : ProjectService;
@@ -20,7 +20,7 @@ class ProjectHandlers {
        } catch (e) {
         return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
        }
     }
@@ -35,7 +35,7 @@ class ProjectHandlers {
        } catch (e) {
             return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
        }
     }
@@ -50,7 +50,7 @@ class ProjectHandlers {
           } catch (e) {
                     return callback({
                         code:status.INTERNAL,
-                        message:"Internal server e"
+                        message:"Internal server error"
                   }) 
           }
     }
@@ -62,12 +62,26 @@ class ProjectHandlers {
              const data = new DeleteProjectMemberResponseData(res as object);
              const response = new DeleteProjectMemberResponse({code,message,res:data});
              return callback(null,response);
-          } catch (e) {
-                    return callback({
-                        code:status.INTERNAL,
-                        message:"Internal server e"
-                  }) 
-          }
+         } catch (e) {
+            return callback({
+               code:status.INTERNAL,
+               message:"Internal server error"
+            }) 
+         }
+      }
+      
+      async handleGetAllUserProjectIds(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetAllUserProjectIdsResponse>,callback:sendUnaryData<GetAllUserProjectIdsResponse>){
+         try {
+            const {code,res,message} = await this._projectService.GetAllUserProjectIds(call.request.body);
+            if(code!==status.OK) return callback({code,message})
+            const response = new GetAllUserProjectIdsResponse({code,message,res : res as string[]})  
+            return callback(null,response)
+         } catch (e) {
+            return callback({
+               code:status.INTERNAL,
+               message:"Internal server error"
+            }) 
+         }
     }
 }
 

@@ -31,6 +31,7 @@ model Team {
   updatedAt        DateTime?              @default(now())
   teamMembers      TeamMember[]
   teamInvitation   TeamMemberInvitation[]
+  teamLink         TeamLink[]
 }
 
 model TeamMember {
@@ -80,6 +81,8 @@ model TeamLink {
   teamId      String
   projectId   String
   linkedAt    DateTime?   @default(now())
+  
+  team       Team @relation(fields: [teamId],references: [teamId],onDelete: Cascade)
 
   @@id([teamId, projectId])
 }

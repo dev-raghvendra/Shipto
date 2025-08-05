@@ -4,6 +4,7 @@ import { OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
 import { CreateTeamRequestDBBodyType, DeleteTeamRequestDBBodyType, TeamMemberDBBodyType, TeamMemberInvitationRequestDBBodyType } from "types/team";
 import { ProjectMemberDBBodyType, ProjectMemberInvitationRequestDBBodyType } from "types/project";
 import { generateId } from "@shipto/services-commons";
+import { DefaultArgs } from "@prisma/runtime/library";
 
 
 const MODEL_MAP = {
@@ -95,6 +96,10 @@ class Database {
         return this._client.team.findUniqueOrThrow({ where: { teamId }, select });
     }
 
+    findTeams(args:Prisma.TeamFindManyArgs){
+        return this._client.team.findMany(args)
+    }
+
     deleteTeamById({teamId}: DeleteTeamRequestDBBodyType) {
         return this._client.team.delete({
             where: {
@@ -175,6 +180,10 @@ class Database {
 
     createTeamLink(args:Prisma.TeamLinkCreateArgs){
         return this._client.teamLink.create(args)
+    }
+
+    startTransaction(fn:(tx: Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">)=>Promise<any>){
+        return this._client.$transaction(fn)
     }
 }
 

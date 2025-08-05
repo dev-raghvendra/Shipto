@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-package shipto.auth;
 
 // User-related messages
 message User {
@@ -275,6 +274,18 @@ message HasPermissionsResponse {
    bool res = 3;
 }
 
+message GetAllUserTeamsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated Team res = 3;
+}
+
+message GetAllUserProjectIdsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated string res = 3;
+}
+
 // AuthService definition
 service AuthService {
   // Authentication
@@ -289,7 +300,8 @@ service AuthService {
   rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
   rpc GetTeam(GetTeamRequest) returns (GetTeamResponse);
   rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
-
+  rpc GetAllUserTeams(BodyLessRequests) returns (GetAllUserTeamsResponse);
+  
   // Team Members
   rpc CreateTeamMemberInvitation(CreateTeamMemberInvitationRequest) returns (CreateTeamMemberInvitationResponse);
   rpc GetTeamMember(GetTeamMemberRequest) returns (GetTeamMemberResponse);
@@ -301,7 +313,8 @@ service AuthService {
   rpc GetProjectMember(GetProjectMemberRequest) returns (GetProjectMemberResponse);
   rpc DeleteProjectMember(DeleteProjectMemberRequest) returns (DeleteProjectMemberResponse);
   rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);
-
+  rpc GetAllUserProjectIds (BodyLessRequests) returns (GetAllUserProjectIdsResponse);
+  
   rpc HasPermissions(HasPermissionsRequest) returns (HasPermissionsResponse);
   // Future: partial decentralized RBAC
   // rpc UpdateTeamMember(UpdateTeamMemberRequest) returns (UpdateTeamMemberResponse);

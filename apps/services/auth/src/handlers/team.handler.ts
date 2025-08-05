@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { AcceptInvitationRequest, CreateTeamMemberInvitationRequest, CreateTeamMemberInvitationResponse, CreateTeamMemberInvitationResponseData, CreateTeamRequest, CreateTeamResponse, DeleteTeamMemberRequest, DeleteTeamMemberResponse, DeleteTeamMemberResponseData, DeleteTeamRequest, DeleteTeamResponse, GetTeamMemberRequest, GetTeamMemberResponse, GetTeamMemberResponseData, GetTeamRequest, GetTeamResponse, Team } from "@shipto/proto";
+import { AcceptInvitationRequest, BodyLessRequests, CreateTeamMemberInvitationRequest, CreateTeamMemberInvitationResponse, CreateTeamMemberInvitationResponseData, CreateTeamRequest, CreateTeamResponse, DeleteTeamMemberRequest, DeleteTeamMemberResponse, DeleteTeamMemberResponseData, DeleteTeamRequest, DeleteTeamResponse, GetAllUserTeamsResponse, GetTeamMemberRequest, GetTeamMemberResponse, GetTeamMemberResponseData, GetTeamRequest, GetTeamResponse, Team } from "@shipto/proto";
 import TeamService from "services/team.service";
 import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType } from "types/team";
-import { AcceptMemberInviteRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
 
 class TeamHandlers {
     private _teamService : TeamService;
@@ -20,7 +20,7 @@ class TeamHandlers {
        } catch (e) {
         return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
        }
     }
@@ -35,7 +35,7 @@ class TeamHandlers {
        } catch (e) {
         return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
        }
     }
@@ -50,7 +50,7 @@ class TeamHandlers {
        } catch (e) {
         return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
        }
     }
@@ -65,7 +65,7 @@ class TeamHandlers {
       } catch (e) {
           return callback({
                 code:status.INTERNAL,
-                message:"Internal server e"
+                message:"Internal server error"
           }) 
       }
     }
@@ -80,7 +80,7 @@ class TeamHandlers {
            } catch (e) {
                 return callback({
                     code:status.INTERNAL,
-                    message:"Internal server e"
+                    message:"Internal server error"
               }) 
            }
     }
@@ -95,7 +95,7 @@ class TeamHandlers {
       } catch (e) {
                 return callback({
                     code:status.INTERNAL,
-                    message:"Internal server e"
+                    message:"Internal server error"
               }) 
       }
     }
@@ -110,7 +110,22 @@ class TeamHandlers {
       } catch (e) {
                 return callback({
                     code:status.INTERNAL,
-                    message:"Internal server e"
+                    message:"Internal server error"
+              }) 
+      }
+    }
+
+    async handleGetAllUserTeams(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetAllUserTeamsResponse>,callback:sendUnaryData<GetAllUserTeamsResponse>){
+      try {
+         const {code,res,message} = await this._teamService.GetAllUserTeams(call.request.body);
+         if(code!==status.OK) return callback({code,message})
+         const data = res?.map(tm=>new Team(tm as object))
+         const response = new GetAllUserTeamsResponse({code,message,res:data})
+         return callback(null,response);
+      } catch (e) {
+                return callback({
+                    code:status.INTERNAL,
+                    message:"Internal server error"
               }) 
       }
     }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PermissionType, TeamRoleType } from '@prisma/index';
 import { UserSchema,Scopes } from './user';
+import { Status } from '@grpc/grpc-js/build/src/constants';
 
 
 
@@ -21,6 +22,8 @@ export const HasPermissionsRequestSchema = z.object({
    authUserData:UserSchema,
    targetUserId:z.string().optional()
 }).strict()
+
+
 
 export type HasPermissionsRequestBodyType = z.infer<typeof HasPermissionsRequestSchema>
 

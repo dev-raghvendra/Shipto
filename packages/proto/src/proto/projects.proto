@@ -1,7 +1,5 @@
 syntax="proto3";
-package shipto.project; 
 
-import "auth.proto";
 
 enum ProjectType {
     UNSPECIFIED_TYPE = 0;

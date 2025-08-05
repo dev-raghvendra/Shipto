@@ -2,7 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import { convertDatesToISO } from "@shipto/services-commons";
 import dbService from "db/dbService";
 import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType } from "types/team";
-import { AcceptMemberInviteRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
 import { HandleServiceErrors } from "utils/service-error";
@@ -92,6 +92,25 @@ class TeamService {
             return HandleServiceErrors({details:e,RPC:"DELETE-TEAM-MEMBER"},"User")
         }
     }
+
+    async GetAllUserTeams({authUserData:{userId}}:BodyLessRequest){
+        try {
+            const res = await dbService.findTeams({
+                where:{
+                    teamMembers:{
+                        some:{
+                            userId
+                        }
+                    }
+                }
+            })
+            if(res.length) return AuthResponse.OK(res,"Teams found");
+            return AuthResponse.NOT_FOUND(null,"User's team not found")
+        } catch (e) {
+            return HandleServiceErrors({e,details:"GET-ALL-USER-TEAMS"},"User")
+        }
+    }
+
 }
 
 export default TeamService

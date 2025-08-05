@@ -23,6 +23,8 @@ export type RPCs =
     | "AcceptTeamInvitation"
     | "AcceptProjectInvitation"
     | "HasPermissions"
+    | "GetAllUserProjectIds"
+    | "GetAllUserTeams"
 
 type RPC_SCHEMA_T = {
     [K in RPCs]: {
@@ -60,5 +62,7 @@ export const RPC_SCHEMA: RPC_SCHEMA_T = {
     DeleteProjectMember: createRPCEntry(DeleteTeamMemberRequestSchema),
     AcceptTeamInvitation:createRPCEntry(AcceptMemberInviteRequestSchema),
     AcceptProjectInvitation:createRPCEntry(AcceptMemberInviteRequestSchema),
-    HasPermissions:createRPCEntry(HasPermissionsRequestSchema)
+    HasPermissions:createRPCEntry(HasPermissionsRequestSchema),
+    GetAllUserProjectIds:createRPCEntry(BodyLessRequestsSchema),
+    GetAllUserTeams:createRPCEntry(BodyLessRequestsSchema)
 } as const
