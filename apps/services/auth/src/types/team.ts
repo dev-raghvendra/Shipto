@@ -1,6 +1,6 @@
+import { UserSchema } from "@shipto/types";
 import z from "zod";
-import { UserBody, UserSchema } from "./user";
-import { AcceptMemberInviteRequestSchema } from "./utility";
+
 
 export const TeamSchema = z.object({
   teamName: z.string(),

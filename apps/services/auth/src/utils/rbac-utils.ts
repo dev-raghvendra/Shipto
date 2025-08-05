@@ -1,6 +1,6 @@
 import { PermissionType, User } from "@prisma/index";
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
-import RBAC_CONFIG from "conf/rbac";
+import RBAC_CONFIG from "config/rbac";
 import dbService from "db/dbService";
 import { ProjectRoleType } from "types/project";
 import { TeamRoleType } from "types/team";

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+message User {
+  string userId = 1;
+  string fullName = 2;
+  string email = 3;
+  string avatarUri = 4;
+  bool   emailVerified = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+  string provider = 8;
+}
+
+message BodyLessRequest {
+  User authUserData = 1;
+}

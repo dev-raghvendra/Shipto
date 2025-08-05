@@ -1,6 +1,5 @@
+import { UserSchema } from "@shipto/types";
 import z from "zod";
-import { UserSchema } from "./user";
-import { AcceptMemberInviteRequestSchema } from "./utility";
 
 export const ProjectRoles = z.enum(['PROJECT_OWNER', 'PROJECT_ADMIN', 'PROJECT_VIEWER','PROJECT_DEVELOPER'])
 export type ProjectRoleType = z.infer<typeof ProjectRoles>;

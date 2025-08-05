@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import dbService from "db/dbService";
 import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
 import { HandleServiceErrors } from "utils/service-error";
@@ -74,7 +74,7 @@ class ProjectService {
       }
     }
 
-      async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequest){
+      async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequestBodyType){
         try {
             const res = await dbService.startTransaction(async(tx)=>{
                 const teamProjects = await tx.team.findMany({
@@ -121,4 +121,3 @@ class ProjectService {
 }
 
 export default ProjectService
-

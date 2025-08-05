@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
-import {GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, SigninRequest, BodyLessRequests, Tokens} from "@shipto/proto";
+import {GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, SigninRequest, BodyLessRequest, Tokens} from "@shipto/proto";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
-import { HasPermissionsRequestBodyType, BodyLessRequest } from "types/utility";
+import { HasPermissionsRequestBodyType, BodyLessRequestBodyType } from "types/utility";
 
 class AuthHandlers {
     private _authService;
@@ -75,7 +75,7 @@ class AuthHandlers {
         }
     }
 
-    async handleGetMe(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetCurrentUserResponse>,callback:sendUnaryData<GetCurrentUserResponse>){
+    async handleGetMe(call:ServerUnaryCall<BodyLessRequest & {body:BodyLessRequestBodyType},GetCurrentUserResponse>,callback:sendUnaryData<GetCurrentUserResponse>){
        try {
           const {code,res,message} = await this._authService.GetMe(call.request.authUserData.userId)
           if(code!==status.OK) return callback({code,message});
@@ -91,7 +91,7 @@ class AuthHandlers {
 
     }
 
-    async handleRefreshToken(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},LoginResponse>,callback:sendUnaryData<LoginResponse>){
+    async handleRefreshToken(call:ServerUnaryCall<BodyLessRequest & {body:BodyLessRequestBodyType},LoginResponse>,callback:sendUnaryData<LoginResponse>){
         try {
             const {res,code,message} = await this._authService.refreshToken(call.request.body);
             if(code!==status.OK) return callback({code,message});

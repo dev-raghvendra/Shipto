@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { CreateProjectMemberInvitationResponse, CreateProjectMemberInvitationRequest, CreateProjectMemberInvitationResponseData, AcceptInvitationRequest, GetProjectMemberResponse, GetProjectMemberResponseData, GetProjectMemberRequest, DeleteProjectMemberRequest, DeleteProjectMemberResponse, DeleteProjectMemberResponseData, BodyLessRequests, GetAllUserProjectIdsResponse} from "@shipto/proto";
+import { CreateProjectMemberInvitationResponse, CreateProjectMemberInvitationRequest, CreateProjectMemberInvitationResponseData, AcceptInvitationRequest, GetProjectMemberResponse, GetProjectMemberResponseData, GetProjectMemberRequest, DeleteProjectMemberRequest, DeleteProjectMemberResponse, DeleteProjectMemberResponseData, BodyLessRequest, GetAllUserProjectIdsResponse} from "@shipto/proto";
 import ProjectService from "services/project.service";
 import { DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequest as BodyLessRequest } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BodyLessRequestBodyType } from "types/utility";
 
 class ProjectHandlers {
     private _projectService : ProjectService;
@@ -70,7 +70,7 @@ class ProjectHandlers {
          }
       }
       
-      async handleGetAllUserProjectIds(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetAllUserProjectIdsResponse>,callback:sendUnaryData<GetAllUserProjectIdsResponse>){
+      async handleGetAllUserProjectIds(call:ServerUnaryCall<BodyLessRequest & {body:BodyLessRequestBodyType},GetAllUserProjectIdsResponse>,callback:sendUnaryData<GetAllUserProjectIdsResponse>){
          try {
             const {code,res,message} = await this._projectService.GetAllUserProjectIds(call.request.body);
             if(code!==status.OK) return callback({code,message})

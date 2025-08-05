@@ -1,8 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
-import { convertDatesToISO } from "@shipto/services-commons";
 import dbService from "db/dbService";
 import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType } from "types/team";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BulkResourceRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
 import { HandleServiceErrors } from "utils/service-error";
@@ -26,7 +25,18 @@ class TeamService {
     async getTeam({teamId,authUserData:{userId}}:GetTeamRequestBodyType){
         try {
             await this._permissions.canReadTeam(userId,teamId);
-            const t = await dbService.findUniqueTeamById(teamId);
+            const t = await dbService.findUniqueTeam({
+                where:{
+                    teamId
+                },
+                include:{
+                    teamMembers:{
+                        include:{
+                            member:true
+                        }
+                    }
+                }
+            });
             return AuthResponse.OK(t,"Team found");
         } catch (e) {
             return HandleServiceErrors({details:e,RPC:"GET-TEAM"},"Team",{PERMISSION_DENIED:"User does not have permissions to get the team"})
@@ -93,7 +103,7 @@ class TeamService {
         }
     }
 
-    async GetAllUserTeams({authUserData:{userId}}:BodyLessRequest){
+    async GetAllUserTeams({authUserData:{userId},skip,limit:take}:BulkResourceRequestBodyType){
         try {
             const res = await dbService.findTeams({
                 where:{
@@ -102,7 +112,9 @@ class TeamService {
                             userId
                         }
                     }
-                }
+                },
+                skip,
+                take
             })
             if(res.length) return AuthResponse.OK(res,"Teams found");
             return AuthResponse.NOT_FOUND(null,"User's team not found")

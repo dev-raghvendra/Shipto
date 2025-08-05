@@ -122,6 +122,9 @@ importers:
         specifier: ^4.0.5
         version: 4.0.5
     devDependencies:
+      '@shipto/types':
+        specifier: workspace:*
+        version: link:../../../packages/types
       '@shipto/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -147,7 +150,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  apps/services/log:
+  apps/services/logs:
     dependencies:
       '@prisma/client':
         specifier: 6.12.0
@@ -169,7 +172,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  apps/services/project:
+  apps/services/projects:
     dependencies:
       '@grpc/grpc-js':
         specifier: ^1.13.4
@@ -190,6 +193,9 @@ importers:
         specifier: ^4.0.5
         version: 4.0.5
     devDependencies:
+      '@shipto/types':
+        specifier: workspace:*
+        version: link:../../../packages/types
       '@shipto/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -284,6 +290,12 @@ importers:
       winston:
         specifier: ^3.17.0
         version: 3.17.0
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
+
+  packages/types:
+    dependencies:
       zod:
         specifier: ^4.0.5
         version: 4.0.5
@@ -701,6 +713,9 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
+
+  '@types/node@20.19.9':
+    resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
 
   '@types/node@22.16.5':
     resolution: {integrity: sha512-bJFoMATwIGaxxx8VJPeM8TonI8t579oRvgAuT8zFugJsJZgzqv0Fu8Mhp68iecjzG7cnN3mO2dJQ5uUM2EFrgQ==}
@@ -2553,6 +2568,10 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
+  '@types/node@20.19.9':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@22.16.5':
     dependencies:
       undici-types: 6.21.0
@@ -3829,7 +3848,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.16.5
+      '@types/node': 20.19.9
       long: 5.3.2
 
   protoc-gen-ts@0.8.7: {}

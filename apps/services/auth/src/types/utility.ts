@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { PermissionType, TeamRoleType } from '@prisma/index';
-import { UserSchema,Scopes } from './user';
-import { Status } from '@grpc/grpc-js/build/src/constants';
+import { PermissionType } from '@prisma/index';
+import { Scopes, UserSchema} from "@shipto/types"
 
 
 
@@ -11,10 +10,10 @@ export const AcceptMemberInviteRequestSchema = z.object({
 });
 export type AcceptMemberInviteRequestBodyType = z.infer<typeof AcceptMemberInviteRequestSchema>
 
-export const BodyLessRequestsSchema = z.object({
+export const BodyLessRequestSchema = z.object({
   authUserData:UserSchema
 }).strict();
-export type BodyLessRequest = z.infer<typeof BodyLessRequestsSchema>;
+export type BodyLessRequestBodyType = z.infer<typeof BodyLessRequestSchema>;
 export const HasPermissionsRequestSchema = z.object({
    resourceId : z.string(),
    scope : Scopes,
@@ -23,7 +22,13 @@ export const HasPermissionsRequestSchema = z.object({
    targetUserId:z.string().optional()
 }).strict()
 
+export const BulkResourceRequestSchema = z.object({
+   authUserData : UserSchema,
+   skip:z.number().optional().default(0),
+   limit:z.number().optional().default(5)
+})
 
+export type BulkResourceRequestBodyType = z.infer<typeof BulkResourceRequestSchema>
 
 export type HasPermissionsRequestBodyType = z.infer<typeof HasPermissionsRequestSchema>
 

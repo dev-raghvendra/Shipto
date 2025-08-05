@@ -1,6 +1,9 @@
-syntax="proto3";
+syntax = "proto3";
 
+ 
 
+import "common.proto";
+// Enums
 enum ProjectType {
     UNSPECIFIED_TYPE = 0;
     STATIC = 1;
@@ -14,6 +17,7 @@ enum Runtime {
     PHP = 3;
 }
 
+// Types
 message Framework {
     string frameworkId = 1;
     string icon = 2;
@@ -32,6 +36,17 @@ message Repository {
     string buildCommand = 6;
     string productionCommand = 7;
 }
+
+message Deployment {
+    string deploymentId = 1;
+    string commitHash = 2;
+    string status = 3;
+    string commitMessage = 4;
+    string author = 5;
+    string projectId = 6;
+    string repositoryId = 7;
+}
+
 
 message Project {
    string projectId = 1;
@@ -55,21 +70,29 @@ message EnviornmentVariablesKeyValue {
 }
 
 
+
+message GetRepositoryRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+
+// Requests
 message CreateProjectRequest {
     string name = 1;
     string framework = 2;
     ProjectType projectType = 3;
-    string  repositoryURI = 4;
+    string repositoryURI = 4;
     string frameworkId = 5;
     string buildCommand = 6;
     string productionCommand = 7;
-    string branch = 8 ;
+    string branch = 8;
     repeated EnviornmentVariablesKeyValue envs = 9;
 }
 
 message UpdateProjectRequest {
     string name = 1;
-    User authUserData= 2;
+    User authUserData = 2;
 }
 
 message DeleteProjectRequest {
@@ -77,29 +100,26 @@ message DeleteProjectRequest {
     string projectId = 2;
 }
 
-
-message ProjectResponse {
-    int32 code = 1;
-    string message = 2;
-    Project res = 3;
-}
-
-
-message RedeployRequest {
-     User authUserData = 1;
-     string deploymentId = 2;
-     string projectId = 3;
-}
-
-message DeleteDeploymentRequest {
-     User authUserData= 1;
-     string deploymentId = 2;
-     string projectId = 3;
-}
-
 message GetProjectRequest {
     User authUserData = 1;
     string projectId = 2;
+}
+
+message GetAllDeploymentsRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+message RedeployRequest {
+    User authUserData = 1;
+    string deploymentId = 2;
+    string projectId = 3;
+}
+
+message DeleteDeploymentRequest {
+    User authUserData = 1;
+    string deploymentId = 2;
+    string projectId = 3;
 }
 
 message GetDeploymentRequest {
@@ -108,32 +128,52 @@ message GetDeploymentRequest {
     string deploymentId = 3;
 }
 
-message GetAllDeploymentsResponse {
-    int32 code =1;
-    string message = 2;
-    repeated Deployment res= 3;
-}
 
-message Deployment {
-    string deploymentId = 1;
-    string commitHash = 2;
-    string status = 3;
-    string commitMessage = 4;
-    string author = 5;
-    string projectId = 6;
-    string repositoryId = 7;
-}
-
-message AllProjectsResponse{
-    int32 code = 1;
-    string message = 2;
-    repeated Project  res = 3;
-}
-
-
-message GetAllDeploymentsRequest {
+message CreateEnvVarsRequest {
     User authUserData = 1;
     string projectId = 2;
+    repeated EnviornmentVariablesKeyValue envs = 3;
+}
+
+message DeleteEnvVarsRequest {
+    User authUserData = 1;
+    repeated EnviornmentVariables envs = 2;
+}
+
+message CreateRepositoryRequest {
+    User authUserData = 1;
+    string repoURI = 2;
+    string projectId = 3;
+    string branch = 4;
+    Framework framework = 5;
+    string buildCommand = 6;
+    string productionCommand = 7;
+}
+
+message UpdateRepositoryRequest {
+    User authUserData = 1;
+    string branch = 2;
+    Framework framework = 5;
+    string buildCommand = 6;
+    string productionCommand = 7;
+}
+
+message DeleteRepositoryRequest {
+    User authUserData = 1;
+    string projectId = 2;
+}
+
+// Responses
+message ProjectResponse {
+    int32 code = 1;
+    string message = 2;
+    Project res = 3;
+}
+
+message AllProjectsResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated Project res = 3;
 }
 
 message DeploymentResponse {
@@ -142,31 +182,56 @@ message DeploymentResponse {
     Deployment res = 3;
 }
 
-message AllDeploymentResponse {
+message AllDeploymentsResponse {
     int32 code = 1;
     string message = 2;
-    Deployment res = 3;
+    repeated Deployment res = 3;
 }
 
-service ProjectsService {
-     rpc CreateProject (CreateProjectRequest)   returns (ProjectResponse);
-     rpc GetProject    (GetProjectRequest)      returns (ProjectResponse);
-     rpc GetAllProjects (BodyLessRequest)       returns (AllProjectsResponse);
-     rpc UpdateProject (UpdateProjectRequest)   returns (ProjectResponse);
-     rpc DeleteProject (DeleteProjectRequest)   returns (ProjectResponse);
-     
-     rpc GetDeployment    (GetDeploymentRequest)    returns     (DeploymentResponse);
-     rpc GetAllDeployments (GetAllDeploymentsRequest) returns      (AllDeploymentsResponse);
-    //  rpc CreateDeployment (CreateDeploymentRequest) returns     (DeploymentResponse);
-     rpc DeleteDeployment (DeleteDeploymentRequest) returns     (DeploymentResponse);
-     rpc RedeployRequest  (RedeployRequest)         returns     (DeploymentResponse);
+message EnvVarsResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated EnviornmentVariables res = 3;
+}
 
-    //  rpc CreateEnvVars (CreateEnvVarsRequest)       returns (EnvVarsResponse);
-    //  rpc DeleteEnvVars (DeleteEnvVarsRequest)       returns (EnvVarsResponse);
-    //  rpc UpdateEnvVars (UpdateEnvVarsRequest)       returns (EnvVarsResponse);
-     
-    //  rpc GetRepository    (GetRepositoryRequest)    returns (RepositoryResponse);
-    //  rpc CreateRepository (CreateRepositoryRequest) returns (RepositoryResponse);
-    //  rpc UpdateRepository (UpdateRepositoryRequest) returns (RepositoryResponse);
-    //  rpc DeleteRepository (DeleteRepositoryRequest) returns (RepositoryResponse);
+message RepositoryResponse {
+    int32 code = 1;
+    string message = 2;
+    Repository res = 3;
+}
+message FrameworkResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated Framework res = 3;
+}
+
+
+
+// Service
+service ProjectsService {
+    // Project
+    rpc CreateProject (CreateProjectRequest) returns (ProjectResponse);
+    rpc GetProject (GetProjectRequest) returns (ProjectResponse);
+    rpc GetAllProjects (BodyLessRequest) returns (AllProjectsResponse);
+    rpc UpdateProject (UpdateProjectRequest) returns (ProjectResponse);
+    rpc DeleteProject (DeleteProjectRequest) returns (ProjectResponse);
+
+    // Deployment
+    rpc GetDeployment (GetDeploymentRequest) returns (DeploymentResponse);
+    rpc GetAllDeployments (GetAllDeploymentsRequest) returns (AllDeploymentsResponse);
+    // rpc CreateDeployment (CreateDeploymentRequest) returns (DeploymentResponse);
+    rpc DeleteDeployment (DeleteDeploymentRequest) returns (DeploymentResponse);
+    rpc Redeploy (RedeployRequest) returns (DeploymentResponse);
+
+    // Environment Variables
+    rpc CreateEnvVars (CreateEnvVarsRequest) returns (EnvVarsResponse);
+    rpc DeleteEnvVars (DeleteEnvVarsRequest) returns (EnvVarsResponse);
+
+    // Repository
+    rpc GetRepository (GetRepositoryRequest) returns (RepositoryResponse);
+    rpc CreateRepository (CreateRepositoryRequest) returns (RepositoryResponse);
+    rpc UpdateRepository (UpdateRepositoryRequest) returns (RepositoryResponse);
+    rpc DeleteRepository (DeleteRepositoryRequest) returns (RepositoryResponse);
+
+    rpc GetFrameworks   (BodyLessRequest) returns (FrameworkResponse);
 }

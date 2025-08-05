@@ -96,6 +96,10 @@ class Database {
         return this._client.team.findUniqueOrThrow({ where: { teamId }, select });
     }
 
+    findUniqueTeam(args:Prisma.TeamFindUniqueOrThrowArgs){
+        return this._client.team.findUniqueOrThrow(args)
+    }
+
     findTeams(args:Prisma.TeamFindManyArgs){
         return this._client.team.findMany(args)
     }

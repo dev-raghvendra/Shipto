@@ -2,11 +2,11 @@ import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { UnimplementedAuthServiceService } from "@shipto/proto";
 import AuthHandlers from "handlers/auth.handler";
 import {createValidator} from "@shipto/services-commons"
-import { RPC_SCHEMA } from "conf/rpc-schema";
+import { RPC_SCHEMA } from "config/rpc-schema";
 import TeamHandlers from "handlers/team.handler";
 import ProjectHandlers from "handlers/project.handlers";
 import logger from "@shipto/services-commons/libs/winston";
-import SECRETS from "conf/secrets";
+import SECRETS from "config/secrets";
 
 const validateRPCBody = createValidator(RPC_SCHEMA);
 const server = new Server();

@@ -1,4 +1,4 @@
-import SECRETS from "conf/secrets"
+import SECRETS from "config/secrets"
 import jwt from "jsonwebtoken"
 
 export function createJwt(payload : Object,expiry?:string | "1d" ){

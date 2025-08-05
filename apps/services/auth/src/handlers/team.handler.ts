@@ -1,8 +1,8 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { AcceptInvitationRequest, BodyLessRequests, CreateTeamMemberInvitationRequest, CreateTeamMemberInvitationResponse, CreateTeamMemberInvitationResponseData, CreateTeamRequest, CreateTeamResponse, DeleteTeamMemberRequest, DeleteTeamMemberResponse, DeleteTeamMemberResponseData, DeleteTeamRequest, DeleteTeamResponse, GetAllUserTeamsResponse, GetTeamMemberRequest, GetTeamMemberResponse, GetTeamMemberResponseData, GetTeamRequest, GetTeamResponse, Team } from "@shipto/proto";
+import { AcceptInvitationRequest, BulkResourceRequest, CreateTeamMemberInvitationRequest, CreateTeamMemberInvitationResponse, CreateTeamMemberInvitationResponseData, CreateTeamRequest, CreateTeamResponse, DeleteTeamMemberRequest, DeleteTeamMemberResponse, DeleteTeamMemberResponseData, DeleteTeamRequest, DeleteTeamResponse, GetAllUserTeamsResponse, GetTeamMemberRequest, GetTeamMemberResponse, GetTeamMemberResponseData, GetTeamRequest, GetTeamResponse, Team } from "@shipto/proto";
 import TeamService from "services/team.service";
 import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType } from "types/team";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequest } from "types/utility";
+import { AcceptMemberInviteRequestBodyType, BulkResourceRequestBodyType } from "types/utility";
 
 class TeamHandlers {
     private _teamService : TeamService;
@@ -115,7 +115,7 @@ class TeamHandlers {
       }
     }
 
-    async handleGetAllUserTeams(call:ServerUnaryCall<BodyLessRequests & {body:BodyLessRequest},GetAllUserTeamsResponse>,callback:sendUnaryData<GetAllUserTeamsResponse>){
+    async handleGetAllUserTeams(call:ServerUnaryCall<BulkResourceRequest & {body:BulkResourceRequestBodyType},GetAllUserTeamsResponse>,callback:sendUnaryData<GetAllUserTeamsResponse>){
       try {
          const {code,res,message} = await this._teamService.GetAllUserTeams(call.request.body);
          if(code!==status.OK) return callback({code,message})

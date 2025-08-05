@@ -1,17 +1,8 @@
 syntax = "proto3";
 
 
-// User-related messages
-message User {
-  string userId = 1;
-  string fullName = 2;
-  string email = 3;
-  string avatarUri = 4;
-  bool   emailVerified = 5;
-  string createdAt = 6;
-  string updatedAt = 7;
-  string provider = 8;
-}
+import "common.proto";
+
 
 message GetUserRequest {
   User authUserData = 1;
@@ -52,9 +43,7 @@ message GetCurrentUserResponse {
   GetCurrentUserResponseData res = 3;
 }
 
-message BodyLessRequests {
-  User authUserData = 1;
-}
+
 
 // Auth-related messages
 message LoginRequest {
@@ -286,6 +275,12 @@ message GetAllUserProjectIdsResponse {
   repeated string res = 3;
 }
 
+message BulkResourceRequest {
+   User authUserData = 1;
+   int32 skip = 2;
+   int32 limit = 3;
+}
+
 // AuthService definition
 service AuthService {
   // Authentication
@@ -293,14 +288,14 @@ service AuthService {
   rpc Signin(SigninRequest) returns (LoginResponse);
   rpc OAuth(OAuthRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc GetMe(BodyLessRequests) returns (GetCurrentUserResponse);
-  rpc RefreshToken(BodyLessRequests) returns (LoginResponse);
+  rpc GetMe(BodyLessRequest) returns (GetCurrentUserResponse);
+  rpc RefreshToken(BodyLessRequest) returns (LoginResponse);
 
   // Team Management
   rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
   rpc GetTeam(GetTeamRequest) returns (GetTeamResponse);
   rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
-  rpc GetAllUserTeams(BodyLessRequests) returns (GetAllUserTeamsResponse);
+  rpc GetAllUserTeams(BulkResourceRequest) returns (GetAllUserTeamsResponse);
   
   // Team Members
   rpc CreateTeamMemberInvitation(CreateTeamMemberInvitationRequest) returns (CreateTeamMemberInvitationResponse);
@@ -313,7 +308,7 @@ service AuthService {
   rpc GetProjectMember(GetProjectMemberRequest) returns (GetProjectMemberResponse);
   rpc DeleteProjectMember(DeleteProjectMemberRequest) returns (DeleteProjectMemberResponse);
   rpc AcceptProjectInvitation(AcceptInvitationRequest) returns (GetProjectMemberResponse);
-  rpc GetAllUserProjectIds (BodyLessRequests) returns (GetAllUserProjectIdsResponse);
+  rpc GetAllUserProjectIds (BodyLessRequest) returns (GetAllUserProjectIdsResponse);
   
   rpc HasPermissions(HasPermissionsRequest) returns (HasPermissionsResponse);
   // Future: partial decentralized RBAC
