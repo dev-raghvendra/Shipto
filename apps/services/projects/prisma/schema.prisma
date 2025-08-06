@@ -81,8 +81,9 @@ model EnvironmentVariable {
 enum DeploymentStatus {
   QUEUED
   INACTIVE
+  FAILED
   PRODUCTION
-  PROVISIONING
+  BUILDING
 }
 
 enum Runtime {

@@ -1,7 +1,8 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
-import dbService from "db/dbService";
+import { BodyLessRequestBodyType } from "@shipto/types";
+import dbService from "db/db-service";
 import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
 import AuthResponse from "utils/response";
 import { HandleServiceErrors } from "utils/service-error";

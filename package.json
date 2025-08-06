@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "postinstall": "npm run generate",
     "generate" :"turbo run generate",
     "dev:db":"sudo docker compose -f ./dev/docker.compose.dev.yml up -d",
     "lint": "turbo run lint",

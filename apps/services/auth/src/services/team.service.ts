@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
-import dbService from "db/dbService";
+import dbService from "db/db-service";
 import { CreateTeamRequestBodyType, DeleteTeamMemberRequestBodyType, DeleteTeamRequestBodyType, GetTeamMemberRequestBodyType, GetTeamRequestBodyType, TeamMemberInvitationRequestBodyType } from "types/team";
 import { AcceptMemberInviteRequestBodyType, BulkResourceRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";

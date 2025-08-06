@@ -1,12 +1,13 @@
-import dbService from "db/dbService";
 import { createJwt } from "libs/jwt";
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import AuthResponse from "utils/response";
 import { compare } from "libs/bcrypt";
 import { HandleServiceErrors } from "utils/service-error";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
-import { BodyLessRequest, HasPermissionsRequestBodyType } from "types/utility";
+import { HasPermissionsRequestBodyType } from "types/utility";
+import { BodyLessRequestBodyType } from "@shipto/types";
 import { PermissionBase } from "utils/rbac-utils";
+import dbService from "db/db-service";
 
 class AuthService {
 
@@ -99,7 +100,7 @@ class AuthService {
         }
     }
 
-    async refreshToken(body:BodyLessRequest){
+    async refreshToken(body:BodyLessRequestBodyType){
       try {
         return this.createSession(body.authUserData);
       } catch (e) {

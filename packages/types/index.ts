@@ -15,3 +15,8 @@ export const UserSchema = z.object({
   updatedAt: z.string(),
   provider:Providers
 }).strict();
+
+export const BodyLessRequestSchema = z.object({
+  authUserData:UserSchema
+}).strict();
+export type BodyLessRequestBodyType = z.infer<typeof BodyLessRequestSchema>;

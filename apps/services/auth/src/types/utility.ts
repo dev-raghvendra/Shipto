@@ -10,10 +10,7 @@ export const AcceptMemberInviteRequestSchema = z.object({
 });
 export type AcceptMemberInviteRequestBodyType = z.infer<typeof AcceptMemberInviteRequestSchema>
 
-export const BodyLessRequestSchema = z.object({
-  authUserData:UserSchema
-}).strict();
-export type BodyLessRequestBodyType = z.infer<typeof BodyLessRequestSchema>;
+
 export const HasPermissionsRequestSchema = z.object({
    resourceId : z.string(),
    scope : Scopes,
