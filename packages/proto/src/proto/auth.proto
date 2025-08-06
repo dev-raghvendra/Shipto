@@ -4,6 +4,7 @@ syntax = "proto3";
 import "common.proto";
 
 
+
 message GetUserRequest {
   User authUserData = 1;
   string targetUserId = 2;
@@ -255,6 +256,7 @@ message HasPermissionsRequest {
    repeated string permissions = 2;
    string resourceId = 3;
    User authUserData = 4;
+   string targetUserId = 5;
 }
 
 message HasPermissionsResponse {

@@ -1,24 +1,28 @@
 import { createJwt } from "libs/jwt";
-import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
-import AuthResponse from "utils/response";
 import { compare } from "libs/bcrypt";
-import { HandleServiceErrors } from "utils/service-error";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
 import { HasPermissionsRequestBodyType } from "types/utility";
 import { BodyLessRequestBodyType } from "@shipto/types";
 import { PermissionBase } from "utils/rbac-utils";
-import dbService from "db/db-service";
+import { Database, dbService } from "db/db-service";
+import { createGrpcErrorHandler, GrpcAppError, GrpcResponse } from "@shipto/services-commons";
+import { status } from "@grpc/grpc-js";
+
 
 class AuthService {
 
     private _permissions : PermissionBase
+    private _dbService : Database
+    private _errorHandler : ReturnType<typeof createGrpcErrorHandler>
 
     constructor(){
         this._permissions = new PermissionBase()
+        this._dbService = dbService;
+        this._errorHandler = createGrpcErrorHandler({serviceName:"AUTH_SERVICE"});
     }
 
     private createSession(u: any) {
-        return AuthResponse.OK({
+        return GrpcResponse.OK({
                 tokens: {
                     accessToken: createJwt(u),
                     refreshToken: createJwt(u, "7d"),
@@ -28,45 +32,42 @@ class AuthService {
 
     async signIn(body: SigninRequestBodyType) {
         try {
-            const u = await dbService.createEmailUser(body);
+            const u = await this._dbService.createEmailUser(body);
             return this.createSession(u);
         } catch (e : any) {
-            return HandleServiceErrors({details:e,RPC:"SIGNIN"},null,{ALREADY_EXISTS:"User already exists with provided email"});
+            return this._errorHandler(e,"SIGNIN");
         }
     }
 
     async login(body: EmailPassLoginRequestBodyType) {
         try {
-            const u = await dbService.findUniqueUser({
+            const u = await this._dbService.findUniqueUser({
                 where:{email:body.email}
             });
             const isVerified = await compare(body.password,u.password)
-            if(!isVerified) throw new PrismaClientKnownRequestError("Invalid pass",{code:"P2025",clientVersion:"4"})
+            if(!isVerified) throw new GrpcAppError(status.NOT_FOUND,"Invalid credentials",null);
             const {password, ...user} = u;
             return this.createSession(user);
-        } catch (e) {
-            return HandleServiceErrors({details:e,RPC:"LOGIN"},null,{NOT_FOUND:"Invalid credentials"});
+        } catch (e:any) {
+            return this._errorHandler(e,"LOGIN");
         }
     }
 
     async OAuth(body:OAuthRequestBodyType){
         try {
-            const u = await dbService.createOAuthUser(body);
+            const u = await this._dbService.createOAuthUser(body);
             return this.createSession(u);
-        } catch (e) {
-             if (
-                e instanceof PrismaClientKnownRequestError &&
-                e.code === "P2002"
-             ){
+        } catch (e:any) {
+             if (e.code === status.ALREADY_EXISTS){
                 return this.createSession(body);
              }
-              return AuthResponse.INTERNAL({details:e,RPC:"OAUTH"})
+            return this._errorHandler(e,"OAUTH");
         }
     }
     
     async GetUser(body:GetUserRequestBodyType){
         try {
-            const u = await dbService.findUniqueUserById(body.targetUserId,{
+            const u = await this._dbService.findUniqueUserById(body.targetUserId,{
                 userId:true,
                 avatarUri:true,
                 fullName:true,
@@ -74,15 +75,15 @@ class AuthService {
                 updatedAt:true,
                 email:true
             });
-            return AuthResponse.OK(u,"User found");
-        } catch (e) {
-           return HandleServiceErrors({details:e,RPC:"GETUSER"},"User");
+            return GrpcResponse.OK(u,"User found");
+        } catch (e:any) {
+           return this._errorHandler(e,"GET-USER");
         }
     }
 
     async GetMe(userId:string){
         try {
-            const u = await dbService.findUniqueUserById(userId,{
+            const u = await this._dbService.findUniqueUserById(userId,{
                 userId:true,
                 fullName:true,
                 avatarUri:true,
@@ -94,17 +95,17 @@ class AuthService {
                 teamMembers:true,
                 projectMembers:true
             })
-            return AuthResponse.OK(u,"User found");
-        } catch (e) {
-            return HandleServiceErrors({details:e,RPC:"GETME"},"User")
+            return GrpcResponse.OK(u,"User found");
+        } catch (e:any) {
+            return this._errorHandler(e,"GET-ME");
         }
     }
 
     async refreshToken(body:BodyLessRequestBodyType){
       try {
         return this.createSession(body.authUserData);
-      } catch (e) {
-        return AuthResponse.INTERNAL(e)
+      } catch (e:any) {
+        return this._errorHandler(e,"REFRESH_TOKEN");
       }
     }
 
@@ -117,9 +118,9 @@ class AuthService {
             scope,
             targetUserId
         })
-        return AuthResponse.OK(has,"Permission derived");
-     } catch (e) {
-        return HandleServiceErrors({details:e,RPC:"HASPERMISSIONS"},"User")
+        return GrpcResponse.OK(has,"Permission derived");
+     } catch (e:any) {
+        return this._errorHandler(e,"HAS-PERMISSIONS");
      }
     }
 }

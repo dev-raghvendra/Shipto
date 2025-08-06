@@ -1,10 +1,10 @@
 import { PermissionType, User } from "@prisma/index";
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
+import { ScopeType } from "@shipto/types";
 import RBAC_CONFIG from "config/rbac";
-import dbService from "db/dbService";
+import {dbService} from "db/db-service";
 import { ProjectRoleType } from "types/project";
 import { TeamRoleType } from "types/team";
-import { ScopeType } from "types/user";
 
 interface PermissionRequest {
     userId : string;

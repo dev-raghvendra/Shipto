@@ -2,7 +2,8 @@ import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import AuthService from "services/auth.service";
 import {GetCurrentUserResponse, GetCurrentUserResponseData, GetUserRequest, GetUserResponse, GetUserResponseData, HasPermissionsRequest, HasPermissionsResponse, LoginRequest,LoginResponse, SigninRequest, BodyLessRequest, Tokens} from "@shipto/proto";
 import { EmailPassLoginRequestBodyType, GetUserRequestBodyType, OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
-import { HasPermissionsRequestBodyType, BodyLessRequestBodyType } from "types/utility";
+import { HasPermissionsRequestBodyType } from "types/utility";
+import { BodyLessRequestBodyType } from "@shipto/types";
 
 class AuthHandlers {
     private _authService;

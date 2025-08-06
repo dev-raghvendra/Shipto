@@ -18,6 +18,7 @@
   "dependencies":{
     "@grpc/grpc-js": "^1.13.4",
     "@prisma/client": "6.12.0",
+    "@shipto/grpc-clients": "workspace:*",
     "@shipto/proto": "workspace:*",
     "@shipto/services-commons": "workspace:*",
     "dotenv": "^17.2.1",

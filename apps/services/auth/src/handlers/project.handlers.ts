@@ -1,8 +1,9 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import { CreateProjectMemberInvitationResponse, CreateProjectMemberInvitationRequest, CreateProjectMemberInvitationResponseData, AcceptInvitationRequest, GetProjectMemberResponse, GetProjectMemberResponseData, GetProjectMemberRequest, DeleteProjectMemberRequest, DeleteProjectMemberResponse, DeleteProjectMemberResponseData, BodyLessRequest, GetAllUserProjectIdsResponse} from "@shipto/proto";
+import { BodyLessRequestBodyType } from "@shipto/types";
 import ProjectService from "services/project.service";
 import { DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
-import { AcceptMemberInviteRequestBodyType, BodyLessRequestBodyType } from "types/utility";
+import { AcceptMemberInviteRequestBodyType } from "types/utility";
 
 class ProjectHandlers {
     private _projectService : ProjectService;

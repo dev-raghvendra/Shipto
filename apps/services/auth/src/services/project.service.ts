@@ -1,83 +1,87 @@
 import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
 import { BodyLessRequestBodyType } from "@shipto/types";
-import dbService from "db/db-service";
+import  { Database, dbService } from "db/db-service";
 import { CreateTeamLinkRequestBodyType, DeleteProjectMemberRequestBodyType, GetProjectMemberRequestBodyType, ProjectMemberInvitationRequestBodyType } from "types/project";
 import { AcceptMemberInviteRequestBodyType } from "types/utility";
 import { Permission } from "utils/rbac-utils";
-import AuthResponse from "utils/response";
-import { HandleServiceErrors } from "utils/service-error";
+import { createGrpcErrorHandler, GrpcAppError, GrpcResponse } from "@shipto/services-commons";
+import { status } from "@grpc/grpc-js";
+
 
 class ProjectService {
     private _permissions : Permission
+    private _dbService : Database;
+    private _errorHandler : ReturnType<typeof createGrpcErrorHandler>
     constructor(){
       this._permissions = new Permission()
+      this._dbService = dbService;
+      this._errorHandler = createGrpcErrorHandler({serviceName:"AUTH_SERVICE"});
     }
     async createProjectMemberInvitation({authUserData:{userId},projectId,userId:targetUserId,role}:ProjectMemberInvitationRequestBodyType){
         try {
             await this._permissions.canInviteProjectMember(userId,projectId);
-            const invitation = await dbService.createProjectInvitation({projectId,userId:targetUserId,role})
-           return AuthResponse.OK(invitation,"Invitation created")
+            const invitation = await this._dbService.createProjectInvitation({projectId,userId:targetUserId,role})
+           return GrpcResponse.OK(invitation,"Invitation created")
         } catch (e:any) {
-         return HandleServiceErrors({details:e,RPC:"CREATE-PROJECT-MEMBER-INVITATION"},null,{PERMISSION_DENIED:"User is not  the owner of project"})
+         return this._errorHandler(e,"CREATE-PROJECT-MEMBER-INVITATION")
        }
     }
 
     async acceptInvitation({inviteId,authUserData:{userId}}:AcceptMemberInviteRequestBodyType){
        try {
-            const {expiresAt,role,projectId} = await dbService.findProjectInviteById(inviteId);
+            const {expiresAt,role,projectId} = await this._dbService.findProjectInviteById(inviteId);
             if(expiresAt?.getMilliseconds() as number >= Date.now()){
-                throw new PrismaClientKnownRequestError("BAD_REQUEST",{code:"400",clientVersion:""})
+                throw new GrpcAppError(status.INVALID_ARGUMENT,"Invite expired",null);
             }
-
-            const member = await dbService.createProjectMember({
+            const member = await this._dbService.createProjectMember({
                 userId,
                 role,
                 projectId
             })
     
-        return AuthResponse.OK(member,"Project joined");
+        return GrpcResponse.OK(member,"Project joined");
        }  
-        catch (e) {
-          return HandleServiceErrors({details:e,RPC:"ACCEPT-PROJECT-MEMBER-INVITATION"},null,{NOT_FOUND:"Invite not found",BAD_REQUEST:"Invite expired"});
+        catch (e:any) {
+          return this._errorHandler(e,"ACCEPT-PROJECT-MEMBER-INVITATION");
        }
     }
 
     async getProjectMember({targetUserId,projectId,authUserData:{userId}}:GetProjectMemberRequestBodyType){
       try {
           await this._permissions.canReadProjectMember(userId,projectId,targetUserId);
-          const member = await dbService.findUniqueProjectMember({userId_projectId:{userId:targetUserId,projectId}});
-          return AuthResponse.OK(member,"Member found");
-      } catch (e) {
-          return HandleServiceErrors({details:e,RPC:"GET-PROJECT-MEMBER-INVITATION"},"User");
+          const member = await this._dbService.findUniqueProjectMember({userId_projectId:{userId:targetUserId,projectId}});
+          return GrpcResponse.OK(member,"Member found");
+      } catch (e:any) {
+          return this._errorHandler(e,"GET-PROJECT-MEMBER-INVITATION");
        }
     }
 
     async deleteProjectMember({targetUserId,projectId,authUserData:{userId}}:DeleteProjectMemberRequestBodyType){
       try {
           await this._permissions.canRemoveProjectMember(userId,projectId,targetUserId);
-          const member = await dbService.deleteProjectMember({userId_projectId:{
+          const member = await this._dbService.deleteProjectMember({userId_projectId:{
             userId:targetUserId,
             projectId
           }})
-          return AuthResponse.OK(member,"Member removed");
-      } catch (e) {
-          return HandleServiceErrors({details:e,RPC:"DELETE-PROJECT-MEMBER-INVITATION"},"User");
+          return GrpcResponse.OK(member,"Member removed");
+      } catch (e:any) {
+          return this._errorHandler(e,"DELETE-PROJECT-MEMBER-INVITATION");
        }
     }
 
     async linkTeam({projectId,teamId, authUserData:{userId}}:CreateTeamLinkRequestBodyType){
       try {
         await this._permissions.canCreateTeamLink(userId,projectId);
-        const link = await dbService.createTeamLink({data:{projectId,teamId}})
-        return AuthResponse.OK(link,"Linked team");
-      } catch (e) {
-        return HandleServiceErrors({details:e,RPC:"LINK-TEAM"},"User",{ALREADY_EXISTS:"Team already linked"});
+        const link = await this._dbService.createTeamLink({data:{projectId,teamId}})
+        return GrpcResponse.OK(link,"Linked team");
+      } catch (e:any) {
+        return this._errorHandler(e,"LINK-TEAM");
       }
     }
 
       async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequestBodyType){
         try {
-            const res = await dbService.startTransaction(async(tx)=>{
+            const res = await this._dbService.startTransaction(async(tx)=>{
                 const teamProjects = await tx.team.findMany({
                     where:{
                         teamMembers:{
@@ -113,10 +117,10 @@ class ProjectService {
                 const finalIds =  [...uniqueProjectIds,...directProjects.map(p=>p.projectId)];
                 return finalIds
             }) as string[]
-            if(res.length) return AuthResponse.OK(res,"ProjectIds found");
-            return AuthResponse.NOT_FOUND(null,"User's projectIds not found")
-        } catch (e) {
-            return HandleServiceErrors({e,details:"GET-ALL-USER-PROJECT-IDS"},"Project")          
+            if(res.length) return GrpcResponse.OK(res,"ProjectIds found");
+            throw new GrpcAppError(status.NOT_FOUND,"No projects found for user",null);
+        } catch (e:any) {
+            return this._errorHandler(e,"GET-ALL-USER-PROJECT-IDS");
         }
     }
 }

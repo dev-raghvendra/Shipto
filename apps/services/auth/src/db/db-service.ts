@@ -3,9 +3,9 @@ import passHashMiddleware from "./middleware";
 import { OAuthRequestBodyType, SigninRequestBodyType } from "types/user";
 import { CreateTeamRequestDBBodyType, DeleteTeamRequestDBBodyType, TeamMemberDBBodyType, TeamMemberInvitationRequestDBBodyType } from "types/team";
 import { ProjectMemberDBBodyType, ProjectMemberInvitationRequestDBBodyType } from "types/project";
-import { generateId } from "@shipto/services-commons";
+import { generateId, GrpcAppError } from "@shipto/services-commons";
 import { DefaultArgs } from "@prisma/runtime/library";
-
+import { status } from "@grpc/grpc-js";
 
 const MODEL_MAP = {
     User: "user",
@@ -14,7 +14,7 @@ const MODEL_MAP = {
     ProjectMemberInvitation: "prj-invite",
 } as const;
 
-class Database {
+export class Database {
     private _client;
 
     constructor() {
@@ -22,174 +22,293 @@ class Database {
         this._client.$use(passHashMiddleware);
     }
 
-    createOAuthUser(body:OAuthRequestBodyType) {
-        return this._client.user.create({
-            data: {
-                userId: generateId("User",MODEL_MAP),
-                emailVerified:true,
-                ...body,
-            },
-            select: {
-                userId:true,
-               avatarUri:true,
-               fullName:true,
-               email:true,
-               emailVerified:true,
-               createdAt:true,
-               provider:true,
-               updatedAt:true
-            },
-        });
+    // FIND METHODS
+    async findUniqueUser(args: Prisma.UserFindUniqueArgs) {
+        const res = await this._client.user.findUnique(args);
+        if(res){
+            return res;
+        }
+        throw new GrpcAppError(status.NOT_FOUND,"User not found",null)
     }
 
-    createEmailUser(body:SigninRequestBodyType){
-        return this._client.user.create({
-            data: {
-                userId: generateId("User",MODEL_MAP),
-                ...body,
-                provider:"EMAIL"
-            },
-            select: {
-                userId:true,
-               avatarUri:true,
-               fullName:true,
-               email:true,
-               emailVerified:true,
-               createdAt:true,
-               provider:true,
-               updatedAt:true
-            },
-        });
+    async findUsers(where: Prisma.UserWhereInput, select: Prisma.UserSelect) {
+        const res = await this._client.user.findMany({ where, select });
+        if(res.length) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"No users found",null);
     }
 
-    findUniqueUser(args: Prisma.UserFindUniqueOrThrowArgs) {
-     return this._client.user.findUniqueOrThrow(args);
+    async findUniqueUserById(userId: string, select?: Prisma.UserSelect) {
+        const res = await this._client.user.findUnique({ where: { userId }, select });
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"User not found",null);
     }
 
-    findUsers(where: Prisma.UserWhereInput, select: Prisma.UserSelect) {
-        return this._client.user.findMany({ where, select });
+    async findUniqueTeamById(teamId: string, select?: Prisma.TeamSelect) {
+        const res = await this._client.team.findUnique({ where: { teamId }, select });
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Team not found",null);
     }
 
-    findUniqueUserById(userId: string, select?: Prisma.UserSelect) {
-        return this._client.user.findUniqueOrThrow({ where: { userId }, select });
+    async findUniqueTeam(args:Prisma.TeamFindUniqueArgs){
+        const res = await this._client.team.findUnique(args);
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Team not found",null);
     }
 
-    createTeam(body: CreateTeamRequestDBBodyType & { userId: string }) {
-        return this._client.team.create({
-            data: {
-                teamId: generateId("Team",MODEL_MAP),
-                teamName:body.teamName,
-                description:body.description,
-                teamMembers: {
-                    create: [
-                        {
-                            role: "TEAM_ADMIN",
-                            userId: body.userId,
-                        },
-                    ],
+    async findTeams(args:Prisma.TeamFindManyArgs){
+        const res = await this._client.team.findMany(args);
+        if(res.length) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"No teams found",null);
+    }
+
+    async findUniqueTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect) {
+        const res = await this._client.teamMember.findUnique({ where, select });
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Team member not found",null);
+    }
+
+    async findTeamMembers(where: Prisma.TeamMemberWhereInput, select?: Prisma.TeamMemberSelect){
+        const res = await this._client.teamMember.findMany({where,select});
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"No team members found",null);
+    }
+
+    async findUniqueProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect) {
+        const res = await this._client.projectMember.findUnique({ where, select });
+        if (res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Project member not found",null);
+    }
+
+    async findProjectMembers(where: Prisma.ProjectMemberWhereInput, select?: Prisma.ProjectMemberSelect){
+        const res = await this._client.projectMember.findMany({where,select});
+        if (res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"No project members found",null);
+    }
+
+    async findTeamInviteById(inviteId: string) {
+        const res = await this._client.teamMemberInvitation.findUnique({ where: { inviteId } });
+        if (res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Team member invitation not found",null);
+    }
+
+    async findProjectInviteById(inviteId: string) {
+        const res = await this._client.projectMemberInvitation.findUnique({ where: { inviteId } });
+        if (res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"Project member invitation not found",null);
+    }
+
+    async findTeamLinks(args:Prisma.TeamLinkFindManyArgs){
+        const res = await this._client.teamLink.findMany(args)
+        if(res) return res;
+        throw new GrpcAppError(status.NOT_FOUND,"No team links found",null);
+    }
+
+    // CREATE METHODS
+    async createOAuthUser(body:OAuthRequestBodyType) {
+        try {
+            const res = await this._client.user.create({
+                data: {
+                    userId: generateId("User",MODEL_MAP),
+                    emailVerified:true,
+                    ...body,
                 },
-            },
-        });
-    }
-    
-    findUniqueTeamById(teamId: string, select?: Prisma.TeamSelect) {
-        return this._client.team.findUniqueOrThrow({ where: { teamId }, select });
-    }
-
-    findUniqueTeam(args:Prisma.TeamFindUniqueOrThrowArgs){
-        return this._client.team.findUniqueOrThrow(args)
-    }
-
-    findTeams(args:Prisma.TeamFindManyArgs){
-        return this._client.team.findMany(args)
-    }
-
-    deleteTeamById({teamId}: DeleteTeamRequestDBBodyType) {
-        return this._client.team.delete({
-            where: {
-                teamId,
-            },
-        });
+                select: {
+                    userId:true,
+                    avatarUri:true,
+                    fullName:true,
+                    email:true,
+                    emailVerified:true,
+                    createdAt:true,
+                    provider:true,
+                    updatedAt:true
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"User already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
-    createTeamMember(body: TeamMemberDBBodyType) {
-        return this._client.teamMember.create({
-            data: {
-                ...body,
-            },
-        });
-    }
-    
-    findUniqueTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect) {
-        return this._client.teamMember.findUniqueOrThrow({ where, select });
-    }
-
-    findTeamMembers(where: Prisma.TeamMemberWhereInput, select?: Prisma.TeamMemberSelect){
-        return this._client.teamMember.findMany({where,select})
-    }
-    
-    deleteTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect){
-        return this._client.teamMember.delete({where,select})
-    }
-
-    createProjectMember(body: ProjectMemberDBBodyType) {
-        return this._client.projectMember.create({
-            data: {
-                ...body,
-            },
-        });
-    }
-
-    findUniqueProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect) {
-        return this._client.projectMember.findUniqueOrThrow({ where, select });
+    async createEmailUser(body:SigninRequestBodyType){
+        try {
+            const res = await this._client.user.create({
+                data: {
+                    userId: generateId("User",MODEL_MAP),
+                    ...body,
+                    provider:"EMAIL"
+                },
+                select: {
+                    userId:true,
+                    avatarUri:true,
+                    fullName:true,
+                    email:true,
+                    emailVerified:true,
+                    createdAt:true,
+                    provider:true,
+                    updatedAt:true
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"User already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
-    findProjectMembers(where: Prisma.ProjectMemberWhereInput, select?: Prisma.ProjectMemberSelect){
-        return this._client.projectMember.findMany({where,select})
-    }
-    
-    deleteProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect){
-        return this._client.projectMember.delete({where,select})
-    }
-
-    createTeamInvitation(body: TeamMemberInvitationRequestDBBodyType) {
-        return this._client.teamMemberInvitation.create({
-            data: {
-                inviteId: generateId("TeamMemberInvitation",MODEL_MAP),
-                ...body
-            },
-        });
-    }
-
-    findTeamInviteById(inviteId: string) {
-        return this._client.teamMemberInvitation.findUniqueOrThrow({ where: { inviteId } });
-    }
-
-    createProjectInvitation(body: ProjectMemberInvitationRequestDBBodyType) {
-        return this._client.projectMemberInvitation.create({
-            data: {
-                inviteId: generateId("ProjectMemberInvitation",MODEL_MAP),
-                ...body
-            },
-        });
+    async createTeam(body: CreateTeamRequestDBBodyType & { userId: string }) {
+        try {
+            const res = await this._client.team.create({
+                data: {
+                    teamId: generateId("Team",MODEL_MAP),
+                    teamName:body.teamName,
+                    description:body.description,
+                    teamMembers: {
+                        create: [
+                            {
+                                role: "TEAM_ADMIN",
+                                userId: body.userId,
+                            },
+                        ],
+                    },
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Team already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
-    findProjectInviteById(inviteId: string) {
-        return this._client.projectMemberInvitation.findUniqueOrThrow({ where: { inviteId } });
+    async createTeamMember(body: TeamMemberDBBodyType) {
+        try {
+            const res = await this._client.teamMember.create({
+                data: {
+                    ...body,
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Team member already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
-    findTeamLinks(args:Prisma.TeamLinkFindManyArgs){
-        return this._client.teamLink.findMany(args)
+    async createProjectMember(body: ProjectMemberDBBodyType) {
+        try {
+            const res = await  this._client.projectMember.create({
+                data: {
+                    ...body,
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Project member already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
-    createTeamLink(args:Prisma.TeamLinkCreateArgs){
-        return this._client.teamLink.create(args)
+    async createTeamInvitation(body: TeamMemberInvitationRequestDBBodyType) {
+        try {
+            const res = await this._client.teamMemberInvitation.create({
+                data: {
+                    inviteId: generateId("TeamMemberInvitation",MODEL_MAP),
+                    ...body
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Team member invitation already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
     }
 
+    async createProjectInvitation(body: ProjectMemberInvitationRequestDBBodyType) {
+        try {
+            const res = await this._client.projectMemberInvitation.create({
+                data: {
+                    inviteId: generateId("ProjectMemberInvitation",MODEL_MAP),
+                    ...body
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Project member invitation already exists",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
+    }
+
+    async createTeamLink(args:Prisma.TeamLinkCreateArgs){
+        try {
+            const res = await this._client.teamLink.create(args)
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new GrpcAppError(status.ALREADY_EXISTS,"Team is already linked with the project",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
+    }
+
+    // DELETE METHODS
+    async deleteTeamById({teamId}: DeleteTeamRequestDBBodyType) {
+        try {
+            const res = await this._client.team.delete({
+                where: {
+                    teamId,
+                },
+            });
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+                throw new GrpcAppError(status.NOT_FOUND, "Team not found", null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
+    }
+
+    async deleteTeamMember(where: Prisma.TeamMemberWhereUniqueInput, select?: Prisma.TeamMemberSelect){
+        try {
+            const res = await this._client.teamMember.delete({where,select})
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+                throw new GrpcAppError(status.NOT_FOUND,"Team member not found",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
+    }
+
+    async deleteProjectMember(where: Prisma.ProjectMemberWhereUniqueInput, select?: Prisma.ProjectMemberSelect){
+        try {
+            const res = await this._client.projectMember.delete({where,select});
+            return res;
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+                throw new GrpcAppError(status.NOT_FOUND,"Project member not found",null);
+            }
+            throw new GrpcAppError(status.INTERNAL,"Unexpected error occurred",null);
+        }
+    }
+
+    // OTHER METHODS
     startTransaction(fn:(tx: Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">)=>Promise<any>){
         return this._client.$transaction(fn)
     }
 }
 
-const dbService = new Database();
-export default dbService;
+export const dbService = new Database();

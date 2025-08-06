@@ -21,7 +21,7 @@ model Project {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  repositories          Repository ?
+  repository          Repository ?
   deployments           Deployment[]
   environmentVariables  EnvironmentVariable[]
 }
@@ -31,6 +31,7 @@ model Framework {
   icon            String
   name            String   @unique
   displayName     String   @unique
+  applicationType ProjectType
   defaultBuildCmd String
   defaultProdCmd  String?  @default("")
   runtime         Runtime  
