@@ -39,5 +39,19 @@ export class GrpcResponse {
 }
 
 
-
+export function promisifyGrpcCall<
+  Fn extends (req: any, callback: (err: any, res: any) => void) => void
+>(
+  fn: Fn,
+  req: Parameters<Fn>[0],
+  errCode: number
+): Promise<NonNullable<Parameters<Parameters<Fn>[1]>[1]>> {
+  return new Promise((resolve, reject) => {
+    fn(req, (err, res) => {
+      if (err) return reject(err);
+      if (!res?.res) return reject({ code: errCode });
+      resolve(res.res);
+    });
+  });
+}
 

@@ -16,6 +16,10 @@ export const CreateProjectRequestSchema = z.object({
     productionCommand:z.string().optional(),
     branch:z.string(),
     repositoryURI:z.url(),
+    domain:z.string(),
+    githubInstallationId:z.string().optional(),
+    githubRepositoryId:z.string().optional(),
+    githubWebhookId:z.string().optional(),
     enviornmentVars:z.array(EnvVarsSchema).optional()
 }).strict();
 
@@ -33,6 +37,7 @@ export const GetAllUserProjectsRequestSchema = z.object({
 export const UpdateProjectRequestSchema = z.object({
     authUserData: UserSchema,
     name: z.string().optional(),
+    domain: z.string().optional(),
     projectId: z.string(),
 }).strict();
 

@@ -93,10 +93,12 @@ message CreateProjectRequest {
     string productionCommand = 7;
     string branch = 8;
     repeated EnviornmentVariablesKeyValue envs = 9;
+    string domain = 10;
 }
 
 message UpdateProjectRequest {
     string name = 1;
+    string domain =4; 
     User authUserData = 2;
     string projectId = 3;
 }

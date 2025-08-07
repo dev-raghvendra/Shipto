@@ -1,5 +1,6 @@
+import { status } from "@grpc/grpc-js";
 import { PermissionType, User } from "@prisma/index";
-import { PrismaClientKnownRequestError } from "@prisma/runtime/library";
+import { GrpcAppError } from "@shipto/services-commons";
 import { ScopeType } from "@shipto/types";
 import RBAC_CONFIG from "config/rbac";
 import {dbService} from "db/db-service";
@@ -208,7 +209,7 @@ export class Permission{
             scope: "PROJECT",
             permission: ["UPDATE"]
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to update this project");
         return result;
     }
 
@@ -219,7 +220,7 @@ export class Permission{
             scope: "PROJECT",
             permission: ["READ"]
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to read this project");
         return result;
     }
 
@@ -230,7 +231,7 @@ export class Permission{
             scope: "TEAM",
             permission: ["READ"]
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to read this team");
         return result;
     }
 
@@ -241,7 +242,7 @@ export class Permission{
             permission: ['DELETE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to delete this project");
         return result;
     }
 
@@ -252,7 +253,7 @@ export class Permission{
             permission: ['UPDATE'],
             resourceId: teamId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to update this team");
         return result;
     }
 
@@ -263,7 +264,7 @@ export class Permission{
             permission: ['DELETE'],
             resourceId: teamId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to delete this team");
         return result;
     }
 
@@ -275,7 +276,7 @@ export class Permission{
             permission: ['CREATE'],
             resourceId: teamId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to invite members to this team");
         return result;
     }
 
@@ -292,6 +293,7 @@ export class Permission{
                 resourceId:teamId
             })
         }
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to read this team member");
         return result;
     }
 
@@ -312,7 +314,7 @@ export class Permission{
                 resourceId: teamId
             });
         }
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to remove this team member");
         return result;
     }
 
@@ -323,7 +325,7 @@ export class Permission{
             permission: ['CREATE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to invite members to this project");
         return result;
     }
 
@@ -344,7 +346,7 @@ export class Permission{
                 resourceId: projectId
             });
         }
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to remove this project member");
         return result;
     }
 
@@ -371,7 +373,7 @@ export class Permission{
             permission: ['CREATE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to link teams to this project");
         return result;
     }
 
@@ -382,7 +384,7 @@ export class Permission{
             permission: ['DELETE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to unlink teams from this project");
         return result;
     }
 
@@ -394,7 +396,7 @@ export class Permission{
             permission: ['CREATE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to create deployments for this project");
         return result;
     }
 
@@ -405,7 +407,7 @@ export class Permission{
             permission: ['UPDATE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to update this deployment for this project");
         return result;
     }
 
@@ -416,7 +418,7 @@ export class Permission{
             permission: ['DELETE'],
             resourceId: projectId
         });
-        if (!result) throw new PrismaClientKnownRequestError("permission denied", { code: "42501", clientVersion: "4" });
+        if (!result) throw new GrpcAppError(status.PERMISSION_DENIED, "You do not have permission to delete this deployment for this project");
         return result;
     }
 

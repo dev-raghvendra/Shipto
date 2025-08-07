@@ -18,12 +18,23 @@ model Project {
   name        String
   framework   String?         
   projectType ProjectType
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
+  domain      String     @unique
 
   repository          Repository ?
   deployments           Deployment[]
   environmentVariables  EnvironmentVariable[]
+}
+
+model GithubInstallation {
+  githubInstallationId String @id
+  userId         String
+  githubUserName String
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  repositoryConfigs    RepositoryConfig[]
 }
 
 model Framework {
@@ -42,21 +53,37 @@ model Framework {
 
 model Repository {
   repositoryId      String    @id @default(uuid())
-  repoURI           String    @unique
+  repoName          String    @unique
   projectId         String    @unique
-  branch            String?   @default("main")
-  frameworkId       String   
-  buildCommand      String
-  productionCommand String?   @default("") 
+  productionCommand String?   @default("")
+  buildCommand      String   @default("")
+  frameworkId       String
+  branch            String
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
 
   project           Project   @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
   framework         Framework @relation(fields: [frameworkId], references: [frameworkId], onDelete: Cascade)
   deployments       Deployment[]
+  repositoryConfigs RepositoryConfig[]
+}
+
+model RepositoryConfig {
+  githubInstallationId String 
+  repoURI           String    @unique
+  repositoryId     String    @unique
+  createdAt        DateTime? @default(now())
+  updatedAt        DateTime? @updatedAt
+  githubRepositoryId String  @unique
+  githubWebhookId String @unique
+
+  repository Repository @relation(fields: [repositoryId], references: [repositoryId], onDelete: Cascade)
+  githubInstallation GithubInstallation @relation(fields: [githubInstallationId], references: [githubInstallationId], onDelete: Cascade)
 }
 
 model Deployment {
   deploymentId    String           @id @default(uuid())
-  commitHash      String
+  commitHash      String         @unique
   status          DeploymentStatus? @default(QUEUED)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
