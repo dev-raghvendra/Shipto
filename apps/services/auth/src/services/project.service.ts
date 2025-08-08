@@ -79,7 +79,7 @@ class ProjectService {
       }
     }
 
-      async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequestBodyType){
+    async GetAllUserProjectIds({authUserData:{userId}}:BodyLessRequestBodyType){
         try {
             const res = await this._dbService.startTransaction(async(tx)=>{
                 const teamProjects = await tx.team.findMany({

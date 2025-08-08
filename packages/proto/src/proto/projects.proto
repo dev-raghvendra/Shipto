@@ -29,12 +29,9 @@ message Framework {
 
 message Repository {
     string repositoryId = 1;
-    string repoURI = 2;
-    string projectId = 3;
-    string branch = 4;
-    Framework framework = 5;
-    string buildCommand = 6;
-    string productionCommand = 7;
+    string projectId = 2;
+    string githubRepoId = 3;
+    string githubRepoName = 4;
 }
 
 message Deployment {
@@ -152,21 +149,10 @@ message DeleteEnvVarsRequest {
 
 message CreateRepositoryRequest {
     User authUserData = 1;
-    string repoURI = 2;
-    string projectId = 3;
-    string branch = 4;
-    Framework framework = 5;
-    string buildCommand = 6;
-    string productionCommand = 7;
+    string githubRepoId = 2;
+    string projectId =3;
 }
 
-message UpdateRepositoryRequest {
-    User authUserData = 1;
-    string branch = 2;
-    Framework framework = 5;
-    string buildCommand = 6;
-    string productionCommand = 7;
-}
 
 message DeleteRepositoryRequest {
     User authUserData = 1;
@@ -176,6 +162,11 @@ message DeleteRepositoryRequest {
 message GetEnvVarsRequest {
     User authUserData = 1;
     string projectId = 2;
+}
+
+message CreateDeploymentRequest {
+    string payload = 1;
+    string signature = 2;
 }
 
 // Responses
@@ -234,7 +225,7 @@ service ProjectsService {
     // Deployment
     rpc GetDeployment (GetDeploymentRequest) returns (DeploymentResponse);
     rpc GetAllDeployments (GetAllDeploymentsRequest) returns (AllDeploymentsResponse);
-    // rpc CreateDeployment (CreateDeploymentRequest) returns (DeploymentResponse);
+    rpc CreateDeployment (CreateDeploymentRequest) returns (DeploymentResponse);
     rpc DeleteDeployment (DeleteDeploymentRequest) returns (DeploymentResponse);
     rpc Redeploy (RedeployRequest) returns (DeploymentResponse);
 
@@ -244,9 +235,7 @@ service ProjectsService {
     rpc GetEnvVars (GetEnvVarsRequest) returns (EnvVarsResponse);
 
     // Repository
-    rpc GetRepository (GetRepositoryRequest) returns (RepositoryResponse);
     rpc CreateRepository (CreateRepositoryRequest) returns (RepositoryResponse);
-    rpc UpdateRepository (UpdateRepositoryRequest) returns (RepositoryResponse);
     rpc DeleteRepository (DeleteRepositoryRequest) returns (RepositoryResponse);
 
     rpc GetFrameworks   (BodyLessRequest) returns (FrameworkResponse);
